@@ -1,4 +1,4 @@
-import { ENHANCED_GLOSSARY } from "@/lib/education/glossary-enhanced";
+import { ENHANCED_GLOSSARY } from "@/lib/education/glossary-full";
 
 export function GlossaryTab() {
   return (

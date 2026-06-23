@@ -29,9 +29,15 @@ import {
 import { drawLineOfCredit } from "./cash-flow";
 import {
   createEducationProgress,
+  normalizeEducationProgress,
   recordConceptLearned,
+  recordTrainingQuiz,
   type ConceptId,
 } from "@/lib/education/concepts";
+import {
+  markRealWorldExerciseComplete,
+  recordFinalExam,
+} from "@/lib/education/training/progress";
 import type {
   BidFactoryDraft,
   CompanyOps,
@@ -114,6 +120,9 @@ interface GameState {
   setGuidedMode: (on: boolean) => void;
   learnConcept: (conceptId: ConceptId) => void;
   recordDecision: (good: boolean) => void;
+  recordTrainingQuizScore: (lessonId: string, score: number) => void;
+  recordFinalExamScore: (score: number) => void;
+  markRealWorldExercise: (lessonId: string) => void;
 
   submitProposal: (
     oppId: string,
@@ -247,7 +256,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       companyOps,
       bidDraft: save.bidDraft ?? null,
       gameOver: save.gameOver ?? null,
-      educationProgress: save.educationProgress ?? createEducationProgress(),
+      educationProgress: normalizeEducationProgress(save.educationProgress),
       tutorialCompleted: save.tutorialCompleted ?? true,
       isLoaded: true,
     });
@@ -294,6 +303,27 @@ export const useGameStore = create<GameState>((set, get) => ({
         ...s.educationProgress,
         goodDecisions: s.educationProgress.goodDecisions + (good ? 1 : 0),
         totalDecisions: s.educationProgress.totalDecisions + 1,
+      },
+    })),
+
+  recordTrainingQuizScore: (lessonId, score) =>
+    set((s) => ({
+      educationProgress: recordTrainingQuiz(s.educationProgress, lessonId, score),
+    })),
+
+  recordFinalExamScore: (score) =>
+    set((s) => ({
+      educationProgress: {
+        ...s.educationProgress,
+        training: recordFinalExam(s.educationProgress.training, score),
+      },
+    })),
+
+  markRealWorldExercise: (lessonId) =>
+    set((s) => ({
+      educationProgress: {
+        ...s.educationProgress,
+        training: markRealWorldExerciseComplete(s.educationProgress.training, lessonId),
       },
     })),
 

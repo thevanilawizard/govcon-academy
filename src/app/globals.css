@@ -38,3 +38,19 @@
     @apply font-medium;
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #program-certificate,
+  #program-certificate * {
+    visibility: visible;
+  }
+  #program-certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

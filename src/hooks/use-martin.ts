@@ -98,6 +98,10 @@ function getFallbackResponse(trigger: MartinTrigger, topicId?: string): string {
       "Delivery strategy sets margin and risk for the entire contract. Document everything and never absorb scope creep without a mod.",
     execution_event:
       "Performance events are learning opportunities. CPARS scores persist 3 years and affect every future bid.",
+    education_lesson:
+      "In my twenty years in GovCon, the contracts professionals who succeed aren't the ones who memorize the FAR — they're the ones who know which clause applies when the COR sends that Friday afternoon email. Study the concept, then walk through a real scenario on your current contract.",
+    guided:
+      "I'm here in guided mode to walk you through each screen. Ask me anything about the opportunity, proposal, or contract in front of you.",
   };
   return fallbacks[trigger] || topicFallbacks.past_perf_zero;
 }

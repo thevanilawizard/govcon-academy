@@ -1,3 +1,13 @@
+import {
+  getNextRecommendedLesson,
+  getProgramProgress,
+  createTrainingProgress,
+  normalizeTrainingProgress,
+  recordLessonQuiz,
+} from "@/lib/education/training/progress";
+import { TRAINING_MODULES } from "@/lib/education/training/catalog";
+import type { TrainingProgress } from "@/lib/education/training/types";
+
 export const EDUCATION_CONCEPTS = [
   { id: "sam_registration", label: "SAM.gov Registration", category: "setup" },
   { id: "naics_selection", label: "NAICS Code Selection", category: "setup" },
@@ -34,20 +44,42 @@ export interface EducationProgress {
   skillsUnlocked: SkillId[];
   goodDecisions: number;
   totalDecisions: number;
+  training: TrainingProgress;
 }
 
 export function createEducationProgress(): EducationProgress {
-  return { conceptsLearned: [], skillsUnlocked: [], goodDecisions: 0, totalDecisions: 0 };
+  return {
+    conceptsLearned: [],
+    skillsUnlocked: [],
+    goodDecisions: 0,
+    totalDecisions: 0,
+    training: createTrainingProgress(),
+  };
+}
+
+export function normalizeEducationProgress(
+  progress?: Partial<EducationProgress> | null
+): EducationProgress {
+  const base = createEducationProgress();
+  if (!progress) return base;
+  return {
+    conceptsLearned: (progress.conceptsLearned ?? base.conceptsLearned) as ConceptId[],
+    skillsUnlocked: (progress.skillsUnlocked ?? base.skillsUnlocked) as SkillId[],
+    goodDecisions: progress.goodDecisions ?? 0,
+    totalDecisions: progress.totalDecisions ?? 0,
+    training: normalizeTrainingProgress(progress.training),
+  };
 }
 
 export function computeReadinessScore(progress: EducationProgress): number {
-  const conceptPct = (progress.conceptsLearned.length / EDUCATION_CONCEPTS.length) * 60;
-  const skillPct = (progress.skillsUnlocked.length / EDUCATION_SKILLS.length) * 25;
+  const conceptPct = (progress.conceptsLearned.length / EDUCATION_CONCEPTS.length) * 40;
+  const skillPct = (progress.skillsUnlocked.length / EDUCATION_SKILLS.length) * 15;
+  const trainingPct = getProgramProgress(progress.training).percent * 0.35;
   const decisionPct =
     progress.totalDecisions > 0
-      ? (progress.goodDecisions / progress.totalDecisions) * 15
+      ? (progress.goodDecisions / progress.totalDecisions) * 10
       : 0;
-  return Math.min(100, Math.round(conceptPct + skillPct + decisionPct));
+  return Math.min(100, Math.round(conceptPct + skillPct + trainingPct + decisionPct));
 }
 
 export function getStudyNextRecommendation(
@@ -55,6 +87,14 @@ export function getStudyNextRecommendation(
   quarter: number,
   hasContracts: boolean
 ): string {
+  const nextLesson = getNextRecommendedLesson(progress.training);
+  if (nextLesson) {
+    const mod = TRAINING_MODULES.find((m) => m.id === nextLesson.moduleId);
+    return `Academy: Complete Module ${mod?.number ?? ""} — Lesson ${nextLesson.number} "${nextLesson.title}" to earn your module certificate.`;
+  }
+  if (progress.training.programCertificateEarned) {
+    return "Congratulations — you've completed the full Contracts Manager training program. Add your program certificate to your professional portfolio.";
+  }
   if (!progress.conceptsLearned.includes("sam_registration")) {
     return "Review SAM.gov registration requirements — every contract starts with an active registration.";
   }
@@ -87,4 +127,15 @@ export function recordConceptLearned(
     }
   }
   return { ...progress, conceptsLearned, skillsUnlocked };
+}
+
+export function recordTrainingQuiz(
+  progress: EducationProgress,
+  lessonId: string,
+  score: number
+): EducationProgress {
+  return {
+    ...progress,
+    training: recordLessonQuiz(progress.training, lessonId, score),
+  };
 }

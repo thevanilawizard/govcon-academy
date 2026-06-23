@@ -7,26 +7,37 @@ import {
   EDUCATION_SKILLS,
   getStudyNextRecommendation,
 } from "@/lib/education/concepts";
+import { getProgramProgress } from "@/lib/education/training/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function EducationCenter() {
   const educationProgress = useGameStore((s) => s.educationProgress);
   const quarter = useGameStore((s) => s.quarter);
   const contracts = useGameStore((s) => s.contracts);
+  const setActiveTab = useGameStore((s) => s.setActiveTab);
   const hasContracts = contracts.some((c) => c.status === "active" || c.status === "pending_setup");
 
   const readiness = computeReadinessScore(educationProgress);
   const studyNext = getStudyNextRecommendation(educationProgress, quarter, hasContracts);
+  const program = getProgramProgress(educationProgress.training);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-medium">Education Center</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Track GovCon concepts you&apos;ve encountered and your real-world readiness.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-base font-medium">Education Center</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Simulator concepts plus the professional Academy training program.
+            </p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setActiveTab("academy")}>
+            Open Education Center
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -38,7 +49,23 @@ export function EducationCenter() {
         </div>
 
         <div>
-          <p className="text-sm font-medium mb-2">Concepts learned ({educationProgress.conceptsLearned.length}/{EDUCATION_CONCEPTS.length})</p>
+          <div className="flex justify-between text-sm mb-2">
+            <span>Academy program</span>
+            <span className="font-medium">
+              {program.completedLessons}/{program.totalLessons} lessons ·{" "}
+              {program.modulesCertified}/6 certificates
+            </span>
+          </div>
+          <Progress value={program.percent} className="h-2" />
+          {educationProgress.training.programCertificateEarned && (
+            <Badge className="mt-2 bg-emerald-600">Program certificate earned</Badge>
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-medium mb-2">
+            Concepts learned ({educationProgress.conceptsLearned.length}/{EDUCATION_CONCEPTS.length})
+          </p>
           <div className="flex flex-wrap gap-1">
             {EDUCATION_CONCEPTS.map((c) => (
               <Badge

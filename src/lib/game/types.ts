@@ -300,7 +300,9 @@ export type MartinTrigger =
   | "proposal_loss"
   | "strategy_pick"
   | "mentor_topic"
-  | "execution_event";
+  | "execution_event"
+  | "education_lesson"
+  | "guided";
 
 export interface MentorTopicPrompt {
   systemContext: string;
