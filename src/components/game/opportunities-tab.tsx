@@ -5,10 +5,12 @@ import { useGameStore } from "@/lib/game/store";
 import { scoreOpportunity } from "@/lib/education/opportunity-intelligence";
 import { getGuidedOpportunityHover } from "@/lib/education/guided-advice";
 import { OpportunityDetailPanel } from "@/components/education/opportunity-detail-panel";
+import { LiveSamTool } from "@/components/tools/live-sam-tool";
 import { formatCurrency } from "@/lib/utils";
 import { MATCH_BORDER_COLORS } from "@/lib/game/constants";
 import { SetAsideBadge } from "@/components/game/set-aside-badge";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Opportunity } from "@/lib/game/types";
 
 const GRADE_COLORS: Record<string, string> = {
@@ -121,19 +123,32 @@ export function OpportunitiesTab() {
       <div>
         <h2 className="text-xl font-medium mb-1">Opportunity Browser</h2>
         <p className="text-sm text-muted-foreground">
-          Click any solicitation for a full educational breakdown and A–F grade before bidding.
+          Simulated solicitations for practice, or search live SAM.gov opportunities with your API key.
         </p>
-        {guidedMode && hoveredOpp && (
-          <p className="text-xs mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-950">
-            <span className="font-medium">Martin: </span>
-            {getGuidedOpportunityHover(hoveredOpp)}
-          </p>
-        )}
       </div>
 
-      {renderSection("Strong Match", strong, "text-emerald-700")}
-      {renderSection("Partial Match", partial, "text-amber-700")}
-      {renderSection("Stretch / Full & Open", stretch, "text-gray-500")}
+      <Tabs defaultValue="simulated">
+        <TabsList>
+          <TabsTrigger value="simulated">Simulated opportunities</TabsTrigger>
+          <TabsTrigger value="live-sam">Live SAM.gov</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="simulated" className="space-y-6 mt-4">
+          {guidedMode && hoveredOpp && (
+            <p className="text-xs p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-950">
+              <span className="font-medium">Martin: </span>
+              {getGuidedOpportunityHover(hoveredOpp)}
+            </p>
+          )}
+          {renderSection("Strong Match", strong, "text-emerald-700")}
+          {renderSection("Partial Match", partial, "text-amber-700")}
+          {renderSection("Stretch / Full & Open", stretch, "text-gray-500")}
+        </TabsContent>
+
+        <TabsContent value="live-sam" className="mt-4">
+          <LiveSamTool onPracticeBid={() => setActiveTab("proposals")} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -190,6 +190,9 @@ export default function LandingPage() {
                 <Button size="lg" variant="secondary" onClick={handlePlayAsGuest}>
                   {hasGuest ? "Continue as Guest" : "Play as Guest"}
                 </Button>
+                <Button size="lg" variant="ghost" onClick={() => router.push("/tools")}>
+                  Professional Tools
+                </Button>
               </div>
             ) : (
               <div className="flex gap-3">
