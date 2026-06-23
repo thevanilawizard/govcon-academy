@@ -42,9 +42,11 @@ interface GameState {
   activeTab: string;
   isLoaded: boolean;
   userId: string | null;
+  isGuest: boolean;
   tutorialCompleted: boolean;
 
   setUserId: (id: string | null) => void;
+  setGuestMode: (guest: boolean) => void;
   setActiveTab: (tab: string) => void;
   setSelectedOppId: (id: string | null) => void;
   addNotification: (message: string, type?: Notification["type"]) => void;
@@ -81,6 +83,7 @@ const initialState = {
   activeTab: "dashboard",
   isLoaded: false,
   userId: null as string | null,
+  isGuest: false,
   tutorialCompleted: false,
 };
 
@@ -88,6 +91,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   ...initialState,
 
   setUserId: (id) => set({ userId: id }),
+  setGuestMode: (guest) => set({ isGuest: guest }),
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedOppId: (id) => set({ selectedOppId: id }),
 

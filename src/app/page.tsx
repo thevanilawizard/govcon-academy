@@ -10,31 +10,44 @@ import { Button } from "@/components/ui/button";
 import { useMartin } from "@/hooks/use-martin";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { EnvConfigError } from "@/components/env-config-error";
+import {
+  getGuestResumePath,
+  hasGuestSave,
+  loadGuestFromStorage,
+  transferGuestSaveToSupabase,
+} from "@/lib/guest-storage";
+import { useGuestHydration } from "@/hooks/use-guest-hydration";
 
 export default function LandingPage() {
   const router = useRouter();
   const [authMode, setAuthMode] = useState<"login" | "signup" | null>(null);
   const [hasSave, setHasSave] = useState(false);
+  const [hasGuest, setHasGuest] = useState(false);
   const [checking, setChecking] = useState(true);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
 
   const loadSave = useGameStore((s) => s.loadSave);
   const resetGame = useGameStore((s) => s.resetGame);
   const setUserId = useGameStore((s) => s.setUserId);
+  const setGuestMode = useGameStore((s) => s.setGuestMode);
   const { askMartin } = useMartin();
 
+  useGuestHydration();
+
   useEffect(() => {
+    setHasGuest(hasGuestSave());
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user: u } }) => {
       if (u) {
         setUser({ id: u.id, email: u.email });
         setUserId(u.id);
+        setGuestMode(false);
         const exists = await checkSaveExists(u.id);
         setHasSave(exists);
       }
       setChecking(false);
     });
-  }, [setUserId]);
+  }, [setUserId, setGuestMode]);
 
   const handleContinue = async () => {
     if (!user) return;
@@ -53,19 +66,48 @@ export default function LandingPage() {
 
   const handleNewGame = () => {
     resetGame();
+    setGuestMode(false);
+    router.push("/intake");
+  };
+
+  const handlePlayAsGuest = () => {
+    setGuestMode(true);
+    const existing = loadGuestFromStorage();
+    if (existing?.save?.form) {
+      loadSave(existing.save);
+      router.push(getGuestResumePath(existing.save));
+      return;
+    }
+    resetGame();
+    setGuestMode(true);
     router.push("/intake");
   };
 
   const handleAuthSuccess = async () => {
     const supabase = createClient();
-    const { data: { user: u } } = await supabase.auth.getUser();
-    if (u) {
-      setUser({ id: u.id, email: u.email });
-      setUserId(u.id);
-      const exists = await checkSaveExists(u.id);
-      setHasSave(exists);
+    const {
+      data: { user: u },
+    } = await supabase.auth.getUser();
+    if (!u) return;
+
+    setUser({ id: u.id, email: u.email });
+    setUserId(u.id);
+    setGuestMode(false);
+
+    const guest = loadGuestFromStorage();
+    if (guest?.save?.form) {
+      await transferGuestSaveToSupabase(u.id, guest.save);
+      loadSave(guest.save);
+      setHasSave(true);
+      setHasGuest(false);
       setAuthMode(null);
+      router.push(getGuestResumePath(guest.save));
+      return;
     }
+
+    const exists = await checkSaveExists(u.id);
+    setHasSave(exists);
+    setAuthMode(null);
   };
 
   const handleSignOut = async () => {
@@ -74,6 +116,7 @@ export default function LandingPage() {
     setUser(null);
     setHasSave(false);
     setUserId(null);
+    setGuestMode(false);
   };
 
   if (checking) {
@@ -137,12 +180,15 @@ export default function LandingPage() {
             </div>
 
             {!user ? (
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button size="lg" onClick={() => setAuthMode("signup")}>
                   Get Started
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => setAuthMode("login")}>
                   Sign In
+                </Button>
+                <Button size="lg" variant="secondary" onClick={handlePlayAsGuest}>
+                  {hasGuest ? "Continue as Guest" : "Play as Guest"}
                 </Button>
               </div>
             ) : (

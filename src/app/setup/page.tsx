@@ -7,7 +7,12 @@ import { SET_ASIDES } from "@/lib/game/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SetAsideBadge } from "@/components/game/set-aside-badge";
+import { GuestBanner } from "@/components/game/guest-banner";
 import { NAICS_CODES } from "@/lib/game/constants";
+import { useGuestHydration } from "@/hooks/use-guest-hydration";
+import { useGamePersistence } from "@/hooks/use-game-persistence";
+import { createClient } from "@/lib/supabase/client";
+import { loadGuestFromStorage } from "@/lib/guest-storage";
 
 const SETUP_STEPS = [
   "What is SAM.gov?",
@@ -20,8 +25,29 @@ export default function SetupPage() {
   const router = useRouter();
   const form = useGameStore((s) => s.form);
   const profile = useGameStore((s) => s.profile);
+  const isGuest = useGameStore((s) => s.isGuest);
   const completeSetup = useGameStore((s) => s.completeSetup);
+  const setUserId = useGameStore((s) => s.setUserId);
+  const setGuestMode = useGameStore((s) => s.setGuestMode);
   const [step, setStep] = useState(0);
+
+  useGuestHydration();
+  useGamePersistence();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        setGuestMode(false);
+        return;
+      }
+      const guestData = loadGuestFromStorage();
+      if (!isGuest && !guestData?.save?.form) {
+        router.push("/");
+      }
+    });
+  }, [router, setUserId, setGuestMode, isGuest]);
 
   useEffect(() => {
     if (!form || !profile) {
@@ -55,6 +81,7 @@ export default function SetupPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-10">
+        {isGuest && <GuestBanner />}
         <div className="mb-8">
           <p className="text-sm text-muted-foreground mb-2">
             Step {step + 1} of {SETUP_STEPS.length} — {SETUP_STEPS[step]}

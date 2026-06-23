@@ -4,9 +4,12 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "@/lib/game/store";
 import { useGamePersistence } from "@/hooks/use-game-persistence";
+import { useGuestHydration } from "@/hooks/use-guest-hydration";
 import { createClient } from "@/lib/supabase/client";
+import { loadGuestFromStorage } from "@/lib/guest-storage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificationBanner } from "@/components/game/notification-banner";
+import { GuestBanner } from "@/components/game/guest-banner";
 import { DashboardTab } from "@/components/game/dashboard-tab";
 import { OpportunitiesTab } from "@/components/game/opportunities-tab";
 import { ProposalsTab } from "@/components/game/proposals-tab";
@@ -21,23 +24,32 @@ export default function GamePage() {
   const router = useRouter();
   const form = useGameStore((s) => s.form);
   const isLoaded = useGameStore((s) => s.isLoaded);
+  const isGuest = useGameStore((s) => s.isGuest);
   const tutorialCompleted = useGameStore((s) => s.tutorialCompleted);
   const activeTab = useGameStore((s) => s.activeTab);
   const setActiveTab = useGameStore((s) => s.setActiveTab);
   const setUserId = useGameStore((s) => s.setUserId);
+  const setGuestMode = useGameStore((s) => s.setGuestMode);
 
+  useGuestHydration();
   useGamePersistence();
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        router.push("/");
+      if (user) {
+        setUserId(user.id);
+        setGuestMode(false);
         return;
       }
-      setUserId(user.id);
+
+      const guestData = loadGuestFromStorage();
+      const guestActive = isGuest || !!guestData?.save?.form;
+      if (!guestActive) {
+        router.push("/");
+      }
     });
-  }, [router, setUserId]);
+  }, [router, setUserId, setGuestMode, isGuest]);
 
   useEffect(() => {
     if (isLoaded && !form) {
@@ -72,6 +84,7 @@ export default function GamePage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-6">
+        {isGuest && <GuestBanner />}
         <NotificationBanner />
         <ProposalResultWatcher />
         <ChoiceEventModal />

@@ -3,14 +3,17 @@
 import { useEffect, useRef } from "react";
 import { useGameStore } from "@/lib/game/store";
 import { createClient } from "@/lib/supabase/client";
+import { saveGuestToStorage } from "@/lib/guest-storage";
 import type { GameSave } from "@/lib/game/types";
 
 export function useGamePersistence() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const isGuest = useGameStore((s) => s.isGuest);
   const tutorialCompleted = useGameStore((s) => s.tutorialCompleted);
   const stateRef = useRef({
     isLoaded: false,
     userId: null as string | null,
+    isGuest: false,
     form: null as GameSave["form"],
     saveData: null as GameSave | null,
   });
@@ -29,6 +32,7 @@ export function useGamePersistence() {
     stateRef.current = {
       isLoaded,
       userId,
+      isGuest,
       form,
       saveData: {
         form,
@@ -41,20 +45,40 @@ export function useGamePersistence() {
         tutorialCompleted,
       },
     };
-  }, [isLoaded, userId, form, profile, fin, quarter, opps, submitted, contracts, tutorialCompleted]);
+  }, [
+    isLoaded,
+    userId,
+    isGuest,
+    form,
+    profile,
+    fin,
+    quarter,
+    opps,
+    submitted,
+    contracts,
+    tutorialCompleted,
+  ]);
 
   useEffect(() => {
-    if (!isLoaded || !userId || !form) return;
+    if (!isLoaded || !form) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
-      const { saveData } = stateRef.current;
+      const { saveData, userId: uid, isGuest: guest } = stateRef.current;
       if (!saveData) return;
+
+      if (guest) {
+        saveGuestToStorage(saveData);
+        return;
+      }
+
+      if (!uid) return;
+
       const supabase = createClient();
       await supabase.from("game_saves").upsert(
         {
-          user_id: userId,
+          user_id: uid,
           form: saveData.form,
           profile: saveData.profile,
           fin: saveData.fin,
@@ -72,7 +96,19 @@ export function useGamePersistence() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [isLoaded, userId, form, profile, fin, quarter, opps, submitted, contracts, tutorialCompleted]);
+  }, [
+    isLoaded,
+    userId,
+    isGuest,
+    form,
+    profile,
+    fin,
+    quarter,
+    opps,
+    submitted,
+    contracts,
+    tutorialCompleted,
+  ]);
 }
 
 export async function loadGameSave(userId: string): Promise<GameSave | null> {

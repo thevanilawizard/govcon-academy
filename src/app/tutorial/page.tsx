@@ -22,13 +22,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { MATCH_BORDER_COLORS } from "@/lib/game/constants";
 import { useMartin } from "@/hooks/use-martin";
+import { GuestBanner } from "@/components/game/guest-banner";
+import { useGuestHydration } from "@/hooks/use-guest-hydration";
+import { useGamePersistence } from "@/hooks/use-game-persistence";
+import { createClient } from "@/lib/supabase/client";
+import { loadGuestFromStorage } from "@/lib/guest-storage";
 
 export default function TutorialPage() {
   const router = useRouter();
   const form = useGameStore((s) => s.form);
   const profile = useGameStore((s) => s.profile);
+  const isGuest = useGameStore((s) => s.isGuest);
   const completeTutorial = useGameStore((s) => s.completeTutorial);
+  const setUserId = useGameStore((s) => s.setUserId);
+  const setGuestMode = useGameStore((s) => s.setGuestMode);
   const { askMartin } = useMartin();
+
+  useGuestHydration();
+  useGamePersistence();
 
   const [stepIndex, setStepIndex] = useState(0);
   const [technical, setTechnical] = useState(3);
@@ -37,6 +48,21 @@ export default function TutorialPage() {
   const [teamingPartner, setTeamingPartner] = useState(false);
   const [practiceResult, setPracticeResult] = useState<string | null>(null);
   const [practiceOutcome, setPracticeOutcome] = useState<"won" | "lost" | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        setGuestMode(false);
+        return;
+      }
+      const guestData = loadGuestFromStorage();
+      if (!isGuest && !guestData?.save?.form) {
+        router.push("/");
+      }
+    });
+  }, [router, setUserId, setGuestMode, isGuest]);
 
   useEffect(() => {
     if (!form || !profile) {
@@ -130,6 +156,7 @@ export default function TutorialPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        {isGuest && <GuestBanner />}
         <div data-tutorial-target="tutorial-opps-header">
           <h1 className="text-2xl font-medium mb-1">SAM.gov Opportunity Browser</h1>
           <p className="text-sm text-muted-foreground">

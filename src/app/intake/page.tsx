@@ -17,7 +17,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { SetAsideBadge } from "@/components/game/set-aside-badge";
+import { GuestBanner } from "@/components/game/guest-banner";
 import { createClient } from "@/lib/supabase/client";
+import { useGuestHydration } from "@/hooks/use-guest-hydration";
+import { useGamePersistence } from "@/hooks/use-game-persistence";
 
 const STEPS = [
   "Founder & Company",
@@ -32,6 +35,11 @@ export default function IntakePage() {
   const router = useRouter();
   const initFromIntake = useGameStore((s) => s.initFromIntake);
   const setUserId = useGameStore((s) => s.setUserId);
+  const setGuestMode = useGameStore((s) => s.setGuestMode);
+  const isGuest = useGameStore((s) => s.isGuest);
+
+  useGuestHydration();
+  useGamePersistence();
 
   const [step, setStep] = useState(0);
   const [founderName, setFounderName] = useState("");
@@ -81,7 +89,12 @@ export default function IntakePage() {
 
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) setUserId(user.id);
+    if (user) {
+      setUserId(user.id);
+      setGuestMode(false);
+    } else {
+      setGuestMode(true);
+    }
 
     initFromIntake(form);
     router.push("/setup");
@@ -96,6 +109,7 @@ export default function IntakePage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-6 py-10">
+        {isGuest && <GuestBanner />}
         <div className="mb-8">
           <p className="text-sm text-muted-foreground mb-2">
             Step {step + 1} of {STEPS.length} — {STEPS[step]}
