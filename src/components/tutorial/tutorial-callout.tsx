@@ -98,7 +98,13 @@ export function TutorialCallout({
           Step {stepIndex + 1} of {totalSteps}
         </p>
         <h3 className="text-base font-medium mb-2">{step.title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{step.content}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{step.content}</p>
+        {step.realWorldTip && (
+          <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-950 mb-4 leading-relaxed">
+            <span className="font-medium">Real world tip — </span>
+            {step.realWorldTip.replace(/^Martin:\s*/, "")}
+          </div>
+        )}
         <div className="flex items-center justify-between gap-2">
           <button onClick={onSkip} className="text-xs text-muted-foreground hover:text-foreground">
             Skip tutorial

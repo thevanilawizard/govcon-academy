@@ -1,3 +1,5 @@
+import type { ConceptId, EducationProgress, SkillId } from "@/lib/education/concepts";
+
 export type SetAsideId = "sb" | "sdvosb" | "vosb" | "wosb" | "8a" | "hubzone" | "full_open";
 export type Background = "military" | "federal" | "private" | "entrepreneur" | "new";
 export type CapitalTier = 15000 | 37500 | 75000 | 175000 | 500000;
@@ -9,6 +11,10 @@ export type ContractStatus = "pending_setup" | "active" | "ended" | "ended_early
 export type MatchTier = "strong" | "partial" | "stretch";
 export type ProposalResult = "pending" | "won" | "lost";
 export type ClearanceLevel = "none" | "secret" | "top_secret";
+export type SamRegistrationStatus = "active" | "expired" | "pending";
+export type ProgressionStage = "micro" | "small_business" | "gsa_schedule" | "idiq" | "prime";
+export type TeamingPartnerId = "none" | "cyber" | "mentor" | "hubzone";
+export type BidFactoryStepNum = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface IntakeForm {
   founderName: string;
@@ -29,6 +35,100 @@ export interface Profile {
   avgPerf: number;
 }
 
+export interface CompanyOps {
+  samStatus: SamRegistrationStatus;
+  pastPerformanceScore: number;
+  bondingCapacity: number;
+  complianceScore: number;
+  progressionStage: ProgressionStage;
+  seenTerms: string[];
+  pinnedTerms: string[];
+  completedFarModules: string[];
+}
+
+export interface BidWorksheet {
+  hasPastPerformance: boolean;
+  priceCompetitive: boolean;
+  hasStaffCapacity: boolean;
+  incumbentStrong: boolean;
+}
+
+export interface PricingWorksheet {
+  directLaborHours: number;
+  loadedLaborRate: number;
+  fringeRate: number;
+  overheadRate: number;
+  gaRate: number;
+  profitFee: number;
+  igce: number;
+  bidPrice: number;
+  unbalancedPricing: boolean;
+}
+
+export interface BidFactoryDraft {
+  oppId: string;
+  step: BidFactoryStepNum;
+  bidDecision: "bid" | "no_bid" | null;
+  worksheet: BidWorksheet;
+  sectionTags: Record<string, string>;
+  teamingPartner: TeamingPartnerId;
+  subcontractingPlan: { smallBusinessPct: number; hubzonePct: number } | null;
+  pricing: PricingWorksheet;
+  selectedTechnicalIds: string[];
+  bafoAccepted: boolean | null;
+}
+
+export interface FarClause {
+  id: string;
+  citation: string;
+  title: string;
+  summary: string;
+  bidImpact: string;
+  violationConsequence: string;
+  relatedSteps: number[];
+}
+
+export interface EducationalTerm {
+  id: string;
+  term: string;
+  definition: string;
+  farReference?: string;
+  farClauseId?: string;
+}
+
+export type InvoiceStatus = "draft" | "submitted" | "approved" | "paid" | "late";
+export type DeliverableStatus = "pending" | "submitted" | "accepted" | "missed";
+export type GameOverReason = "bankruptcy" | "debarment" | "default_termination";
+
+export interface Deliverable {
+  id: string;
+  title: string;
+  dueMonth: number;
+  status: DeliverableStatus;
+  submittedAtMonth?: number;
+}
+
+export interface GovInvoice {
+  id: string;
+  contractId: string;
+  amount: number;
+  periodLabel: string;
+  status: InvoiceStatus;
+  quarterCreated: number;
+  quarterSubmitted?: number;
+  quarterApproved?: number;
+  quarterPaid?: number;
+  paymentTermsDays: 30 | 60 | 90;
+  interestAmount?: number;
+}
+
+export interface GameOverState {
+  reason: GameOverReason;
+  title: string;
+  message: string;
+  teachable: string;
+}
+
 export interface FinState {
   cash: number;
   burn: number;
@@ -36,6 +136,10 @@ export interface FinState {
   wins: number;
   proposals: number;
   totalValue: number;
+  receivables: number;
+  pendingApproval: number;
+  lineOfCreditLimit: number;
+  lineOfCreditUsed: number;
 }
 
 export interface Opportunity {
@@ -78,9 +182,16 @@ export interface SubmittedProposal {
   value: number;
   sliders: ProposalSliders;
   winProbability: number;
+  complianceScore?: number;
   result: ProposalResult;
   submittedAt: string;
   resolvedAt?: string;
+  debrief?: {
+    technicalScore: number;
+    priceScore: number;
+    pastPerfScore: number;
+    competitorScore: number;
+  };
 }
 
 export interface ExecEvent {
@@ -130,6 +241,12 @@ export interface ContractExec {
   optYrDone: number;
   cpars: CparsRecord[];
   pendingChoice: ChoiceEvent | null;
+  deliverables: Deliverable[];
+  invoices: GovInvoice[];
+  qaspScore: number;
+  consecutiveMissedDeliverables: number;
+  stopWorkActive: boolean;
+  paymentTermsDays?: 30 | 60 | 90;
 }
 
 export interface Contract {
@@ -158,6 +275,10 @@ export interface GameSave {
   opps: Opportunity[];
   submitted: SubmittedProposal[];
   contracts: Contract[];
+  companyOps?: CompanyOps | null;
+  bidDraft?: BidFactoryDraft | null;
+  educationProgress?: EducationProgress | null;
+  gameOver?: GameOverState | null;
   tutorialCompleted?: boolean;
   updated_at?: string;
 }
@@ -190,6 +311,7 @@ export interface TutorialStep {
   id: string;
   title: string;
   content: string;
+  realWorldTip?: string;
   target?: string;
   placement?: "top" | "bottom" | "left" | "right";
 }
@@ -218,7 +340,12 @@ export interface SetAsideInfo {
 export interface GlossaryTerm {
   term: string;
   definition: string;
+  whyItMatters?: string;
+  example?: string;
+  commonMistake?: string;
 }
+
+export type { EducationProgress, ConceptId, SkillId };
 
 export interface MentorTopic {
   id: string;

@@ -73,6 +73,19 @@ export function getCparsColor(score: number): string {
   return "bg-red-100 text-red-800";
 }
 
+export function getComplianceColor(score: number): string {
+  if (score >= 85) return "text-emerald-600";
+  if (score >= 70) return "text-amber-600";
+  if (score >= 50) return "text-orange-600";
+  return "text-red-600";
+}
+
+export function getRunwayDays(cash: number, burn: number, revenue: number): number {
+  const netBurn = burn - revenue;
+  if (netBurn <= 0) return 999;
+  return Math.floor((cash / netBurn) * 30);
+}
+
 export function getPerformanceBarColor(score: number): string {
   if (score >= 4.5) return "bg-emerald-500";
   if (score >= 3.5) return "bg-green-400";

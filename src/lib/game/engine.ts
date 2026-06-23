@@ -23,6 +23,14 @@ import type {
   ProposalSliders,
   SetAsideId,
 } from "./types";
+import { aggregateFinFromInvoices, processInvoicePipeline, repayLineOfCredit } from "./cash-flow";
+import {
+  acceptSubmittedDeliverables,
+  createQuarterInvoice,
+  initializeContractExecution,
+  maybeTriggerExecutionEvent,
+  processDeliverablesAtQuarterEnd,
+} from "./contract-execution";
 import { generateCAGE, generateUEI, getCparsLabel, randomChoice, randomInt } from "../utils";
 
 function uid(): string {
@@ -46,6 +54,10 @@ export function createFinState(capital: number): FinState {
     wins: 0,
     proposals: 0,
     totalValue: 0,
+    receivables: 0,
+    pendingApproval: 0,
+    lineOfCreditLimit: Math.round(capital * 0.5),
+    lineOfCreditUsed: 0,
   };
 }
 
@@ -303,7 +315,7 @@ export function createContract(opp: Opportunity): Contract {
     evalCriteria: opp.evalCriteria,
     status: "pending_setup",
     wonAt: new Date().toISOString(),
-    exec: {
+    exec: initializeContractExecution({
       strategy: null,
       margin: 0,
       grossMonthly: Math.round(opp.estimatedValue / totalMonths),
@@ -316,7 +328,12 @@ export function createContract(opp: Opportunity): Contract {
       optYrDone: 0,
       cpars: [],
       pendingChoice: null,
-    },
+      deliverables: [],
+      invoices: [],
+      qaspScore: 85,
+      consecutiveMissedDeliverables: 0,
+      stopWorkActive: false,
+    }),
   };
 }
 
@@ -337,14 +354,14 @@ export function applyDeliveryStrategy(
   return {
     ...contract,
     status: "active",
-    exec: {
+    exec: initializeContractExecution({
       ...contract.exec,
       strategy,
       margin,
       grossMonthly,
       netMonthly,
       costMonthly,
-    },
+    }),
   };
 }
 
@@ -356,45 +373,83 @@ export function calcTotalRevenue(contracts: Contract[]): number {
 
 export function advanceQuarter(
   fin: FinState,
-  contracts: Contract[]
+  contracts: Contract[],
+  currentQuarter: number
 ): { fin: FinState; contracts: Contract[]; notifications: string[] } {
   const notifications: string[] = [];
-  const activeContracts = contracts.filter((c) => c.status === "active");
-  const quarterRevenue = activeContracts.reduce(
-    (sum, c) => sum + c.exec.netMonthly * 3,
+  let updatedContracts = [...contracts];
+  let updatedFin = { ...fin };
+  let quarterCashDelta = 0;
+
+  // Overhead burn + contract execution costs hit immediately (payroll/subs)
+  const activeContracts = updatedContracts.filter((c) => c.status === "active");
+  const quarterBurn = fin.burn * 3;
+  const quarterExecutionCosts = activeContracts.reduce(
+    (sum, c) => sum + (c.exec.stopWorkActive ? c.exec.costMonthly : c.exec.costMonthly * 3),
     0
   );
-  const quarterBurn = fin.burn * 3;
+  updatedFin.cash -= quarterBurn + quarterExecutionCosts;
 
-  let updatedContracts = [...contracts];
-  let updatedFin = {
-    ...fin,
-    cash: fin.cash - quarterBurn + quarterRevenue,
-    revenue: calcTotalRevenue(contracts),
-  };
-
-  let quarterCashDelta = 0;
+  if (quarterExecutionCosts > 0) {
+    notifications.push(
+      `Paid $${(quarterBurn + quarterExecutionCosts).toLocaleString()} in overhead and contract costs — government payment still pending on open invoices.`
+    );
+  }
 
   updatedContracts = updatedContracts.map((contract) => {
     if (contract.status !== "active") return contract;
 
-    let exec = { ...contract.exec };
+    let c = { ...contract };
+    let exec = { ...c.exec };
     exec.months += 3;
 
-    const eventResult = processQuarterlyEvent({ ...contract, exec });
+    // Accept deliverables submitted before quarter close
+    c = acceptSubmittedDeliverables({ ...c, exec });
+    exec = c.exec;
+
+    // Check for missed CDRLs
+    const deliverableResult = processDeliverablesAtQuarterEnd({ ...c, exec });
+    c = deliverableResult.contract;
+    exec = c.exec;
+    if (deliverableResult.notification) notifications.push(deliverableResult.notification);
+
+    // Create draft invoice for quarter (unless stop-work)
+    if (!exec.stopWorkActive) {
+      const newInvoice = createQuarterInvoice({ ...c, exec }, currentQuarter);
+      exec.invoices = [...exec.invoices, newInvoice];
+      notifications.push(
+        `SF-1034 draft ready for "${c.title}" — $${newInvoice.amount.toLocaleString()} (Net-${exec.paymentTermsDays})`
+      );
+    }
+
+    // Quarterly performance events
+    const eventResult = processQuarterlyEvent({ ...c, exec });
     if (eventResult) {
       exec = eventResult.exec;
       quarterCashDelta += eventResult.cashDelta;
       if (eventResult.notification) notifications.push(eventResult.notification);
     }
 
+    // Random mod / stop-work events
+    const modEvent = maybeTriggerExecutionEvent({ ...c, exec });
+    if (modEvent) {
+      c = modEvent;
+      exec = c.exec;
+      notifications.push(`Execution decision required: ${exec.pendingChoice?.title} on "${c.title}"`);
+    }
+
     const optYearBoundary = 12 * (exec.optYrDone + 1);
-    if (exec.months >= optYearBoundary && exec.optYrDone < contract.optionYears) {
+    if (exec.months >= optYearBoundary && exec.optYrDone < c.optionYears) {
       const cparsScore = Math.min(5, Math.max(1, exec.performance));
       const cparsLabel = getCparsLabel(cparsScore);
       exec.cpars = [
         ...exec.cpars,
-        { quarter: Math.ceil(exec.months / 3), score: cparsScore, label: cparsLabel, optionYear: exec.optYrDone + 1 },
+        {
+          quarter: Math.ceil(exec.months / 3),
+          score: cparsScore,
+          label: cparsLabel,
+          optionYear: exec.optYrDone + 1,
+        },
       ];
       exec.optYrDone += 1;
 
@@ -404,26 +459,46 @@ export function advanceQuarter(
 
       if (Math.random() < exerciseProb) {
         notifications.push(
-          `Option Year ${exec.optYrDone} exercised for "${contract.title}" — CPARS: ${cparsLabel} (${cparsScore.toFixed(1)})`
+          `Option Year ${exec.optYrDone} exercised for "${c.title}" — CPARS: ${cparsLabel} (${cparsScore.toFixed(1)})`
         );
       } else {
         notifications.push(
-          `Option Year ${exec.optYrDone} NOT exercised for "${contract.title}" — contract ended early. CPARS: ${cparsLabel}`
+          `Option Year ${exec.optYrDone} NOT exercised for "${c.title}" — contract ended early. CPARS: ${cparsLabel}`
         );
-        return { ...contract, status: "ended_early" as const, exec };
+        return { ...c, status: "ended_early" as const, exec };
       }
     }
 
     if (exec.months >= exec.totalMonths) {
-      notifications.push(`Contract "${contract.title}" completed all option years.`);
-      return { ...contract, status: "ended" as const, exec };
+      notifications.push(`Contract "${c.title}" completed all option years.`);
+      return { ...c, status: "ended" as const, exec };
     }
 
-    return { ...contract, exec };
+    return { ...c, exec };
   });
 
-  updatedFin.revenue = calcTotalRevenue(updatedContracts);
-  updatedFin.cash += quarterCashDelta;
+  // Process invoice payment pipeline across all contracts
+  const allInvoices = updatedContracts.flatMap((c) => c.exec.invoices);
+  const pipeline = processInvoicePipeline(allInvoices, currentQuarter + 1);
+  updatedFin.cash += pipeline.cashReceived + quarterCashDelta;
+  pipeline.latePaymentNotes.forEach((n) => notifications.push(n));
+
+  // Re-attach processed invoices to contracts
+  updatedContracts = updatedContracts.map((c) => ({
+    ...c,
+    exec: {
+      ...c.exec,
+      invoices: pipeline.invoices.filter((inv) => inv.contractId === c.id),
+    },
+  }));
+
+  // Auto-repay line of credit when cash arrives
+  if (pipeline.cashReceived > 0 && updatedFin.lineOfCreditUsed > 0) {
+    updatedFin = repayLineOfCredit(updatedFin, pipeline.cashReceived * 0.3);
+  }
+
+  const activeNetMonthly = calcTotalRevenue(updatedContracts);
+  updatedFin = aggregateFinFromInvoices(updatedFin, pipeline.invoices, activeNetMonthly);
 
   return { fin: updatedFin, contracts: updatedContracts, notifications };
 }

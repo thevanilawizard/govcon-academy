@@ -27,6 +27,9 @@ export function useGamePersistence() {
   const opps = useGameStore((s) => s.opps);
   const submitted = useGameStore((s) => s.submitted);
   const contracts = useGameStore((s) => s.contracts);
+  const companyOps = useGameStore((s) => s.companyOps);
+  const bidDraft = useGameStore((s) => s.bidDraft);
+  const educationProgress = useGameStore((s) => s.educationProgress);
 
   useEffect(() => {
     stateRef.current = {
@@ -42,6 +45,9 @@ export function useGamePersistence() {
         opps,
         submitted,
         contracts,
+        companyOps,
+        bidDraft,
+        educationProgress,
         tutorialCompleted,
       },
     };
@@ -56,6 +62,9 @@ export function useGamePersistence() {
     opps,
     submitted,
     contracts,
+    companyOps,
+    bidDraft,
+    educationProgress,
     tutorialCompleted,
   ]);
 
@@ -86,6 +95,9 @@ export function useGamePersistence() {
           opps: saveData.opps,
           submitted: saveData.submitted,
           contracts: saveData.contracts,
+          company_ops: saveData.companyOps,
+          bid_draft: saveData.bidDraft,
+          education_progress: saveData.educationProgress,
           tutorial_completed: saveData.tutorialCompleted ?? false,
           updated_at: new Date().toISOString(),
         },
@@ -107,6 +119,9 @@ export function useGamePersistence() {
     opps,
     submitted,
     contracts,
+    companyOps,
+    bidDraft,
+    educationProgress,
     tutorialCompleted,
   ]);
 }
@@ -120,9 +135,17 @@ export async function loadGameSave(userId: string): Promise<GameSave | null> {
     .single();
 
   if (error || !data) return null;
-  const save = data as GameSave & { tutorial_completed?: boolean };
+  const save = data as GameSave & {
+    tutorial_completed?: boolean;
+    company_ops?: GameSave["companyOps"];
+    bid_draft?: GameSave["bidDraft"];
+    education_progress?: GameSave["educationProgress"];
+  };
   return {
     ...save,
+    companyOps: save.companyOps ?? save.company_ops ?? null,
+    bidDraft: save.bidDraft ?? save.bid_draft ?? null,
+    educationProgress: save.educationProgress ?? save.education_progress ?? null,
     tutorialCompleted: save.tutorialCompleted ?? save.tutorial_completed ?? true,
   };
 }

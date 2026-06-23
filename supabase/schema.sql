@@ -10,6 +10,8 @@ create table game_saves (
   opps jsonb,
   submitted jsonb default '[]'::jsonb,
   contracts jsonb default '[]'::jsonb,
+  company_ops jsonb,
+  bid_draft jsonb,
   tutorial_completed boolean default false,
   updated_at timestamp with time zone default now()
 );

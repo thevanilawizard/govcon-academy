@@ -188,11 +188,12 @@ export const MARTIN_SYSTEM_PROMPT = `You are Martin Business, a government contr
 
 Communication style:
 - Direct and honest — no sugarcoating, no false reassurance
-- Specific — cite real agencies, FAR part numbers, dollar thresholds, NAICS codes
-- Teaching-focused — always explain the why behind every piece of advice
+- Specific — always cite a real FAR clause number (e.g. FAR 52.219-14), dollar amount, or agency statistic
+- Teaching-focused — explain the why behind every piece of advice
 - Conversational — you've been there, not a textbook author
-- 4–5 sentences maximum per response
-- No preamble, no sign-off — just the advice, immediately`;
+- Write 6–8 sentences per response
+- Always end with one specific action the player should take right now
+- No preamble, no sign-off — start with the advice immediately`;
 
 /** @deprecated use MARTIN_SYSTEM_PROMPT */
 export const MARCUS_SYSTEM_PROMPT = MARTIN_SYSTEM_PROMPT;
@@ -268,58 +269,82 @@ export const MENTOR_TOPIC_PROMPTS: Record<string, MentorTopicPrompt> = {
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   {
-    id: "welcome",
-    title: "Welcome to the SAM.gov Opportunity Browser",
+    id: "sam",
+    title: "What SAM.gov Actually Is",
     content:
-      "Every federal contract opportunity is posted on SAM.gov. Your firm is now registered — this is where you find work. Each quarter, 12 new solicitations appear. Your job is to find the ones you can actually win.",
+      "SAM.gov (System for Award Management) is the official U.S. government portal for contractor registration AND all contract opportunities. Your UEI, CAGE code, NAICS codes, set-aside certifications, and bank account for payment all live here. No active SAM registration = no contracts, no payments. Registration is free but must be renewed annually.",
+    realWorldTip:
+      "Martin: Before you bid anything, log into SAM.gov and verify every field matches your proposal — expired registration is the #1 preventable disqualification I see.",
     target: "tutorial-opps-header",
     placement: "bottom",
   },
   {
-    id: "tiers",
-    title: "Three-Tier Matching System",
+    id: "naics",
+    title: "NAICS Codes & Size Standards",
     content:
-      "Green border = Strong Match (your NAICS AND set-aside align). Amber = Partial Match (one aligns). Gray = Stretch (neither aligns). In real GovCon, strong matches are where you spend proposal dollars.",
+      "NAICS codes are 6-digit classifications defining your business type. Each code has an SBA size standard (revenue cap). You can register up to 3 NAICS codes in SAM.gov. Solicitations specify a NAICS — you must be registered in that code AND under the size standard to qualify as small business.",
+    realWorldTip:
+      "Martin: Look up your NAICS at sba.gov/size-standards — picking the wrong code invites size protests that kill awards after you've already celebrated.",
     target: "tutorial-opp-tiers",
     placement: "bottom",
   },
   {
-    id: "solicitation",
-    title: "Reading a Solicitation",
+    id: "set_asides",
+    title: "Set-Asides vs Sole Source",
     content:
-      "Each field tells you something critical: Set-aside determines who can bid. NAICS defines the work type. Evaluation criteria (LPTA vs Best Value) tells you what wins. Contract type (FFP vs T&M) defines your cost risk. Days remaining is your deadline.",
+      "Set-asides restrict competition to certified firms (SDVOSB, 8(a), HUBZone, WOSB). Sole source means only one firm can receive the award under FAR 6.302 authority — 8(a) firms can receive sole-source awards up to $4.5M. Every agency has annual small business goals by set-aside type — VA and DoD exceed SDVOSB targets consistently.",
+    realWorldTip:
+      "Martin: Match your SAM.gov certifications to agency goals — VA awards over $20B annually to SDVOSBs under Public Law 109-461.",
     target: "tutorial-solicitation-detail",
     placement: "right",
   },
   {
-    id: "bid_no_bid",
-    title: "Bid/No-Bid Decision Framework",
+    id: "solicitation",
+    title: "Reading a Solicitation (Sections L, M, C, H)",
     content:
-      "Before writing a single page of proposal, run five checks: NAICS match, set-aside eligibility, clearance requirement, competition level, and past performance. Two or more failures = strong pass signal. Chasing unwinnable bids is how new firms go bankrupt.",
+      "Section L = Instructions to Offerors (how to format your proposal). Section M = Evaluation Criteria (how you'll be scored). Section C = Statement of Work / PWS (what you must deliver). Section H = Special Contract Requirements. Missing Section L requirements = non-responsive proposal under FAR 52.215-1.",
+    realWorldTip:
+      "Martin: Build a compliance matrix mapping every Section C paragraph to a proposal page — evaluators use this exact method.",
     target: "tutorial-bid-analysis",
     placement: "left",
   },
   {
-    id: "sliders",
-    title: "Proposal Builder Sliders",
+    id: "bid_no_bid",
+    title: "Bid/No-Bid Framework",
     content:
-      "Technical Approach = quality of your solution. Price Competitiveness = how aggressively you bid. Past Performance = strength of your references. On LPTA contracts, price dominates — crank price up, don't over-invest in technical. On Best Value, balance all three.",
+      "Four questions before any pursuit: (1) Do we have relevant past performance? (2) Is our price competitive vs. the IGCE? (3) Do we have staff to execute? (4) Is the incumbent beatable? Three 'no' answers = pass. A typical proposal costs $15K–$50K in capture hours — chasing unwinnable bids bankrupts new firms.",
+    realWorldTip:
+      "Martin: I passed on 60% of opportunities in my first year — that discipline is why I'm still in business.",
+    target: "tutorial-proposal-sliders",
+    placement: "top",
+  },
+  {
+    id: "sliders",
+    title: "Proposal Builder Decisions",
+    content:
+      "Technical = compliance with PWS, not marketing fluff. Price = position vs. IGCE on LPTA; trade-off factor on Best Value. Past Performance = CPARS ratings — new firms should team to fill this gap. LPTA: price 4–5, technical 3. Best Value: balance all three per Section M weights.",
+    realWorldTip:
+      "Martin: On LPTA recompetes, I spend 70% of proposal effort on the cost volume, 30% on technical — reverse that ratio and you'll lose.",
     target: "tutorial-proposal-sliders",
     placement: "top",
   },
   {
     id: "submission",
-    title: "After You Submit",
+    title: "After Submission — The Evaluation Room",
     content:
-      "Agencies take 3–7 weeks to evaluate. You win or lose based on your scores vs. competitors. Every win builds past performance via CPARS — the government's permanent record of your performance that follows you for 3 years.",
+      "A Source Selection Evaluation Board reads your proposal against Section M criteria. Technical, price, and past performance are scored separately. Evaluation takes 3–7 weeks. Wins build CPARS (3-year record). Losses entitle you to a debrief under FAR 15.506 within 3 business days — always request one.",
+    realWorldTip:
+      "Martin: Email the CO within 24 hours of a loss: 'We respectfully request a debrief per FAR 15.506.' Free competitive intelligence.",
     target: "tutorial-submission-info",
     placement: "bottom",
   },
   {
     id: "practice",
-    title: "Your Practice Bid",
+    title: "Practice Bid",
     content:
-      "Time to apply what you learned. Review this opportunity, set your sliders, and submit. You'll get guided feedback on your bid decision — this is exactly how real capture managers debrief their teams.",
+      "Apply everything: review the opportunity, set your sliders with intention, and submit. You'll get guided feedback — exactly how real capture managers debrief their teams after a color team review.",
+    realWorldTip:
+      "Martin: Treat this practice bid like a $30K pursuit — the habits you build here are the habits you'll use on real SAM.gov opportunities tomorrow.",
     target: "tutorial-practice-bid",
     placement: "top",
   },

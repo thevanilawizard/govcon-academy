@@ -17,7 +17,11 @@ import { ContractsTab } from "@/components/game/contracts-tab";
 import { MartinTab } from "@/components/game/martin-tab";
 import { GlossaryTab } from "@/components/game/glossary-tab";
 import { ChoiceEventModal } from "@/components/game/choice-event-modal";
+import { ComplianceAuditModal } from "@/components/game/compliance-audit-modal";
+import { FieldManualTab } from "@/components/game/field-manual-tab";
 import { ProposalResultWatcher } from "@/components/game/proposal-result-watcher";
+import { GameOverModal } from "@/components/game/game-over-modal";
+import { GuidedMartinPanel } from "@/components/education/guided-martin-panel";
 import { Button } from "@/components/ui/button";
 
 export default function GamePage() {
@@ -30,6 +34,8 @@ export default function GamePage() {
   const setActiveTab = useGameStore((s) => s.setActiveTab);
   const setUserId = useGameStore((s) => s.setUserId);
   const setGuestMode = useGameStore((s) => s.setGuestMode);
+  const guidedMode = useGameStore((s) => s.guidedMode);
+  const setGuidedMode = useGameStore((s) => s.setGuidedMode);
 
   useGuestHydration();
   useGamePersistence();
@@ -77,9 +83,18 @@ export default function GamePage() {
             <span className="text-lg font-medium text-primary">GovCon Academy</span>
             <span className="text-sm text-muted-foreground ml-3">{form.companyName}</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
-            Exit
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant={guidedMode ? "default" : "outline"}
+              onClick={() => setGuidedMode(!guidedMode)}
+            >
+              Guided Mode {guidedMode ? "ON" : "OFF"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+              Exit
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -88,24 +103,33 @@ export default function GamePage() {
         <NotificationBanner />
         <ProposalResultWatcher />
         <ChoiceEventModal />
+        <ComplianceAuditModal />
+        <GameOverModal />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-            <TabsTrigger value="proposals">Proposals</TabsTrigger>
-            <TabsTrigger value="contracts">Contracts</TabsTrigger>
-            <TabsTrigger value="martin">Martin</TabsTrigger>
-            <TabsTrigger value="glossary">Glossary</TabsTrigger>
-          </TabsList>
+        <div className="flex gap-8">
+          <div className="flex-1 min-w-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="mb-6">
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+                <TabsTrigger value="proposals">Bid Factory</TabsTrigger>
+                <TabsTrigger value="contracts">Contracts</TabsTrigger>
+                <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
+                <TabsTrigger value="martin">Martin</TabsTrigger>
+                <TabsTrigger value="glossary">Glossary</TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="dashboard"><DashboardTab /></TabsContent>
-          <TabsContent value="opportunities"><OpportunitiesTab /></TabsContent>
-          <TabsContent value="proposals"><ProposalsTab /></TabsContent>
-          <TabsContent value="contracts"><ContractsTab /></TabsContent>
-          <TabsContent value="martin"><MartinTab /></TabsContent>
-          <TabsContent value="glossary"><GlossaryTab /></TabsContent>
-        </Tabs>
+              <TabsContent value="dashboard"><DashboardTab /></TabsContent>
+              <TabsContent value="opportunities"><OpportunitiesTab /></TabsContent>
+              <TabsContent value="proposals"><ProposalsTab /></TabsContent>
+              <TabsContent value="contracts"><ContractsTab /></TabsContent>
+              <TabsContent value="field-manual"><FieldManualTab /></TabsContent>
+              <TabsContent value="martin"><MartinTab /></TabsContent>
+              <TabsContent value="glossary"><GlossaryTab /></TabsContent>
+            </Tabs>
+          </div>
+          <GuidedMartinPanel />
+        </div>
       </main>
     </div>
   );
