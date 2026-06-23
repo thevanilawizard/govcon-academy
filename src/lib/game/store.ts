@@ -98,6 +98,7 @@ interface GameState {
   completeTutorial: () => void;
   loadSave: (save: GameSave) => void;
   resetGame: () => void;
+  startOverFresh: () => void;
   getSaveData: () => GameSave;
 
   setBidDraft: (draft: BidFactoryDraft | null) => void;
@@ -253,6 +254,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   resetGame: () => set({ ...initialState, isLoaded: true }),
+
+  startOverFresh: () =>
+    set((s) => ({
+      ...initialState,
+      isLoaded: true,
+      userId: s.userId,
+      isGuest: s.isGuest,
+    })),
 
   getSaveData: () => {
     const s = get();

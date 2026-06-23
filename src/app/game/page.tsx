@@ -22,6 +22,7 @@ import { FieldManualTab } from "@/components/game/field-manual-tab";
 import { ProposalResultWatcher } from "@/components/game/proposal-result-watcher";
 import { GameOverModal } from "@/components/game/game-over-modal";
 import { GuidedMartinPanel } from "@/components/education/guided-martin-panel";
+import { ResetGameButton } from "@/components/game/reset-game-button";
 import { Button } from "@/components/ui/button";
 
 export default function GamePage() {
@@ -36,6 +37,7 @@ export default function GamePage() {
   const setGuestMode = useGameStore((s) => s.setGuestMode);
   const guidedMode = useGameStore((s) => s.guidedMode);
   const setGuidedMode = useGameStore((s) => s.setGuidedMode);
+  const quarter = useGameStore((s) => s.quarter);
 
   useGuestHydration();
   useGamePersistence();
@@ -83,7 +85,8 @@ export default function GamePage() {
             <span className="text-lg font-medium text-primary">GovCon Academy</span>
             <span className="text-sm text-muted-foreground ml-3">{form.companyName}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            <ResetGameButton quarter={quarter} />
             <Button
               size="sm"
               variant={guidedMode ? "default" : "outline"}
