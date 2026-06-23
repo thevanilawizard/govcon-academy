@@ -1,8 +1,10 @@
 import { lesson, q, tf, scenario } from "../content-helpers";
 import type { TrainingModule } from "../types";
 import {
+  FINAL_EXAM_MAX_ATTEMPTS,
   FINAL_EXAM_PASS_THRESHOLD,
   FINAL_EXAM_QUESTION_COUNT,
+  FINAL_EXAM_TIME_LIMIT_SECONDS,
 } from "../types";
 
 export const MODULE_6: TrainingModule = {
@@ -15,7 +17,7 @@ export const MODULE_6: TrainingModule = {
     "Choose the right NCMA certification path for your federal contracting role",
     "Navigate DAU courses and defense acquisition workforce credentials",
     "Map career progression from contracts specialist to senior leadership",
-    "Pass the 100-question comprehensive program final exam with confidence",
+    "Pass the 150-question comprehensive program final exam with confidence",
   ],
   lessons: [
     lesson(
@@ -294,7 +296,7 @@ export const MODULE_6: TrainingModule = {
       "Final Exam and Readiness Assessment",
       [
         "Understand the comprehensive final exam format and passing requirements",
-        "Review content coverage across all six program modules",
+        "Review content coverage across all eight program modules",
         "Apply effective exam preparation and test-taking strategies",
         "Assess personal readiness before attempting the final exam",
       ],
@@ -302,32 +304,32 @@ export const MODULE_6: TrainingModule = {
         {
           heading: "Exam Overview",
           content:
-            `The GovCon Academy comprehensive final exam is a ${FINAL_EXAM_QUESTION_COUNT}-question assessment covering the full Contracts Manager and Acquisition Specialist curriculum. Questions are drawn from lesson quiz banks across all modules plus supplemental scenario-based items testing integrated judgment. You must score at least ${FINAL_EXAM_PASS_THRESHOLD}% to pass and earn the program certificate. The exam is timed and should be attempted only after completing all regular lessons and achieving passing quiz scores (70%) on each.`,
+            `The GovCon Academy comprehensive final exam is a ${FINAL_EXAM_QUESTION_COUNT}-question assessment covering the full Contracts Manager and Acquisition Specialist curriculum. Questions are drawn from lesson quiz banks across all modules plus supplemental scenario-based items testing integrated judgment. You must score at least ${FINAL_EXAM_PASS_THRESHOLD}% to pass and earn the program certificate. The exam has a ${FINAL_EXAM_TIME_LIMIT_SECONDS / 3600}-hour time limit and a maximum of ${FINAL_EXAM_MAX_ATTEMPTS} attempts before module review is required. Attempt only after completing all regular lessons with passing quiz scores (70%).`,
         },
         {
           heading: "Module Content Breakdown",
           content:
-            "Module 1 — Foundations of Federal Contracting (4 lessons): FAR hierarchy, contract types, acquisition lifecycle, SAM.gov. Module 2 — The FAR in Depth (8 lessons): Parts 1–4, 9, 12, 15, 19, 31, 33, and 52. Module 3 — DFARS and DoD Contracting (4 lessons): DFARS structure, cyber CMMC, security, TINA and cost submissions. Module 4 — Proposal Development and Capture (4 lessons): capture, Section L/M compliance, technical volumes, pricing and BOE. Module 5 — Proposal Writing and Business Development (5 lessons): pre-proposal BD, RFP analysis, technical writing, pricing strategy, past performance. Module 6 — Professional Certification Prep (3 lessons): NCMA credentials, DAU workforce training, career paths. Expect proportionally more questions from larger modules.",
+            "Module 1 — Foundations of Federal Contracting: FAR hierarchy, contract types, acquisition lifecycle, SAM.gov. Module 2 — The FAR in Depth: Parts 1–4, 9, 12, 15, 19, 31, 33, and 52 with regulatory deep dives. Module 3 — DFARS and DoD Contracting: DFARS structure, NIST 800-171 (252.204-7020), CMMC (252.204-7021), TINA (252.215-7010), export control (252.225-7048), cost principles (252.231-7000), accounting system admin (252.242-7006), CPSR (252.244-7001), FMS, and OTA. Module 4 — Contract Administration: mods, invoicing, CPARS, claims, closeout. Module 5 — Proposal Development: capture, Section L/M compliance, technical volumes, pricing. Module 6 — Professional Certification Prep: NCMA, DAU, career paths. Module 7 — Accounting & Finance: job costing, indirect rates, ICS, TINA, contract financing. Module 8 — Ethics & Compliance: FAR 3.1, FCA, FAR 52.203-13. Expect proportionally more questions from larger modules.",
         },
         {
           heading: "Preparation Strategy",
           content:
-            "Review missed quiz questions from every lesson—explanations cite the governing FAR/DFARS principle. Complete all real-world exercises to cement applied knowledge. Use Martin AI prompts to drill weak domains. Focus extra study on FAR Part 15 source selection, Part 31 cost principles, DFARS cyber clauses, proposal compliance, and contract administration workflows. The final exam tests synthesis: scenario questions may combine COR direction limits, mod requirements, invoicing rules, and ethics in a single item.",
+            "Review missed quiz questions from every lesson—explanations cite the governing FAR/DFARS principle. Complete all real-world exercises and interactive scenarios to cement applied knowledge. Use Martin AI prompts to drill weak domains. Focus extra study on FAR Part 15 source selection, Part 31 cost principles, DFARS cyber clauses, proposal compliance, accounting/indirect rates, ethics, and contract administration workflows. The final exam tests synthesis: scenario questions may combine COR direction limits, mod requirements, invoicing rules, DCAA audit response, and ethics in a single item.",
         },
         {
           heading: "Readiness Checklist and Exam Day",
           content:
-            "Before starting, confirm: all 28 regular lessons completed with ≥70% quiz scores; real-world exercises attempted for weak areas; module certificates earned for Modules 1–5; quiet environment and uninterrupted time blocked. During the exam, read scenario stems carefully, eliminate clearly wrong answers, and flag FAR/DFARS citations mentally. You may retake the exam if you do not pass—use debrief feedback to target remediation. Passing unlocks the GovCon Academy Professional Certification and full program completion credit.",
+            `Before starting, confirm: all regular lessons completed with ≥70% quiz scores; real-world exercises and scenarios attempted for weak areas; module certificates earned for Modules 1–8; quiet environment and three uninterrupted hours blocked. During the exam, read scenario stems carefully, eliminate clearly wrong answers, and flag FAR/DFARS citations mentally. You have ${FINAL_EXAM_MAX_ATTEMPTS} attempts maximum — each attempt generates a detailed score report by topic area. Passing unlocks the GovCon Academy Professional Certification and full program completion credit.`,
         },
       ],
-      "Complete the readiness checklist: verify all module quizzes passed, re-take your three lowest-scoring lesson quizzes, and block ninety uninterrupted minutes for the final exam. When ready, launch the exam from this lesson.",
+      "Complete the readiness checklist: verify all module quizzes passed, re-take your three lowest-scoring lesson quizzes, and block three uninterrupted hours for the final exam. When ready, launch the exam from this lesson.",
       [],
       {
         isFinalExam: true,
         realWorldExercise:
           "Run a self-assessment: list your five weakest quiz domains, re-study those lessons, and score yourself on ten mixed practice questions before attempting the final exam.",
         martinPrompt:
-          "Give me a final exam cram session covering all six GovCon Academy modules. Ask me five scenario questions mixing FAR Part 15, DFARS cyber, proposal compliance, contract mods under Part 43, and NCMA certification paths. Explain each answer with citations.",
+          "Give me a final exam cram session covering all eight GovCon Academy modules. Ask me five scenario questions mixing FAR Part 15, DFARS cyber, proposal compliance, contract mods under Part 43, accounting/indirect rates, ethics, and NCMA certification paths. Explain each answer with citations.",
       }
     ),
   ],

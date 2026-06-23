@@ -53,7 +53,7 @@ export function EducationCenter() {
             <span>Academy program</span>
             <span className="font-medium">
               {program.completedLessons}/{program.totalLessons} lessons ·{" "}
-              {program.modulesCertified}/6 certificates
+              {program.modulesCertified}/{program.totalModules} certificates
             </span>
           </div>
           <Progress value={program.percent} className="h-2" />

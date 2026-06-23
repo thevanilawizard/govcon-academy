@@ -36,8 +36,10 @@ import {
 } from "@/lib/education/concepts";
 import {
   markRealWorldExerciseComplete,
+  markScenarioComplete,
   recordFinalExam,
 } from "@/lib/education/training/progress";
+import type { ExamCategory } from "@/lib/education/training/types";
 import type {
   BidFactoryDraft,
   CompanyOps,
@@ -121,8 +123,12 @@ interface GameState {
   learnConcept: (conceptId: ConceptId) => void;
   recordDecision: (good: boolean) => void;
   recordTrainingQuizScore: (lessonId: string, score: number) => void;
-  recordFinalExamScore: (score: number) => void;
+  recordFinalExamScore: (
+    score: number,
+    topicScores: Partial<Record<ExamCategory, number>>
+  ) => void;
   markRealWorldExercise: (lessonId: string) => void;
+  markScenarioComplete: (lessonId: string) => void;
 
   submitProposal: (
     oppId: string,
@@ -311,11 +317,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       educationProgress: recordTrainingQuiz(s.educationProgress, lessonId, score),
     })),
 
-  recordFinalExamScore: (score) =>
+  recordFinalExamScore: (score, topicScores) =>
     set((s) => ({
       educationProgress: {
         ...s.educationProgress,
-        training: recordFinalExam(s.educationProgress.training, score),
+        training: recordFinalExam(s.educationProgress.training, score, topicScores),
       },
     })),
 
@@ -324,6 +330,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       educationProgress: {
         ...s.educationProgress,
         training: markRealWorldExerciseComplete(s.educationProgress.training, lessonId),
+      },
+    })),
+
+  markScenarioComplete: (lessonId) =>
+    set((s) => ({
+      educationProgress: {
+        ...s.educationProgress,
+        training: markScenarioComplete(s.educationProgress.training, lessonId),
       },
     })),
 

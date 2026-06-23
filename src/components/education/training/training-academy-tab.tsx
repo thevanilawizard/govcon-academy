@@ -23,12 +23,13 @@ import { ProgramCertificate } from "@/components/education/training/program-cert
 import { TrainingLessonView } from "@/components/education/training/training-lesson-view";
 import { TrainingQuiz } from "@/components/education/training/training-quiz";
 import { FinalExamRunner } from "@/components/education/training/final-exam-runner";
+import { TrainingResourcesSection } from "@/components/education/training/training-resources-section";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-type View = "overview" | "module" | "lesson" | "quiz" | "final-exam" | "module-cert" | "program-cert";
+type View = "overview" | "module" | "lesson" | "quiz" | "final-exam" | "module-cert" | "program-cert" | "resources";
 
 export function TrainingAcademyTab() {
   const form = useGameStore((s) => s.form);
@@ -68,6 +69,10 @@ export function TrainingAcademyTab() {
         onBack={() => setView("module")}
       />
     );
+  }
+
+  if (view === "resources") {
+    return <TrainingResourcesSection onBack={() => setView("overview")} />;
   }
 
   if (view === "final-exam") {
@@ -117,6 +122,8 @@ export function TrainingAcademyTab() {
         completed={isLessonComplete(selectedLesson.id, educationProgress.training)}
         bestScore={educationProgress.training.quizBestScores[selectedLesson.id]}
         exerciseDone={educationProgress.training.realWorldExercisesCompleted.includes(selectedLesson.id)}
+        scenarioDone={educationProgress.training.scenariosCompleted.includes(selectedLesson.id)}
+        trainingProgress={educationProgress.training}
         locked={!isLessonUnlocked(selectedLesson.id, educationProgress.training)}
         onBack={() => setView("module")}
         onTakeQuiz={() => setView("quiz")}
@@ -194,7 +201,7 @@ export function TrainingAcademyTab() {
                       educationProgress.training.finalExamPassed ? (
                         <Badge className="bg-emerald-600">{educationProgress.training.finalExamScore}%</Badge>
                       ) : (
-                        <Badge variant="outline">100 questions</Badge>
+                        <Badge variant="outline">150 questions · 3 hr</Badge>
                       )
                     ) : done ? (
                       <Badge variant="outline" className="bg-emerald-50 text-emerald-800">{score}% ✓</Badge>
@@ -221,9 +228,10 @@ export function TrainingAcademyTab() {
         <h2 className="text-xl font-medium">{PROGRAM_TITLE}</h2>
         <p className="text-sm text-muted-foreground mt-1">{PROGRAM_SUBTITLE}</p>
         <p className="text-sm mt-3 leading-relaxed max-w-2xl">
-          Six modules, 32 lessons, and a 100-question comprehensive final exam. Pass each lesson quiz at{" "}
-          {QUIZ_PASS_THRESHOLD}%+ to unlock the next lesson. Earn module certificates and the full program
-          credential by passing the final exam at 75%+.
+          Eight modules, 40 lessons, case studies, interactive scenarios, sample documents, and a{" "}
+          150-question comprehensive final exam. Pass each lesson quiz at {QUIZ_PASS_THRESHOLD}%+ to
+          unlock the next lesson. Earn module certificates and the full program credential by passing
+          the final exam at 75%+ within three attempts.
         </p>
       </div>
 
@@ -232,7 +240,8 @@ export function TrainingAcademyTab() {
           <div className="flex justify-between text-sm">
             <span>Program progress</span>
             <span className="font-medium">
-              {program.completedLessons}/{program.totalLessons} lessons · {program.modulesCertified}/6 certificates
+              {program.completedLessons}/{program.totalLessons} lessons · {program.modulesCertified}/
+              {program.totalModules} certificates
             </span>
           </div>
           <Progress value={program.percent} className="h-2" />
@@ -246,6 +255,12 @@ export function TrainingAcademyTab() {
           )}
         </CardContent>
       </Card>
+
+      <div>
+        <Button variant="outline" size="sm" onClick={() => setView("resources")}>
+          Real world tools & templates
+        </Button>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         {TRAINING_MODULES.map((mod) => {

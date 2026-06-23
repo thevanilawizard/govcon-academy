@@ -43,8 +43,8 @@ export function ProgramCertificate({
         <p className="text-2xl font-medium">{founderName}</p>
         <p className="text-sm">{companyName}</p>
         <p className="text-sm leading-relaxed max-w-lg mx-auto pt-2">
-          For successful completion of all six modules, professional lesson assessments, and the
-          100-question comprehensive final exam
+          For successful completion of all eight modules, professional lesson assessments, and the
+          150-question comprehensive final exam
           {examScore !== null ? ` (score: ${examScore}%)` : ""} — preparing the recipient for Contracts
           Manager and Acquisition Specialist roles at federal contractors.
         </p>

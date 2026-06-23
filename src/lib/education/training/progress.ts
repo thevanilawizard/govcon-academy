@@ -1,6 +1,7 @@
 import { getFinalExamLesson, TRAINING_MODULES, getAllLessons, getLessonById, getModuleById } from "./catalog";
 import type { TrainingLesson, TrainingProgress } from "./types";
 import {
+  FINAL_EXAM_MAX_ATTEMPTS,
   FINAL_EXAM_PASS_THRESHOLD,
   QUIZ_PASS_THRESHOLD,
 } from "./types";
@@ -14,7 +15,10 @@ export function createTrainingProgress(): TrainingProgress {
     certificateEarned: false,
     finalExamScore: null,
     finalExamPassed: false,
+    finalExamAttempts: 0,
+    finalExamTopicScores: {},
     realWorldExercisesCompleted: [],
+    scenariosCompleted: [],
   };
 }
 
@@ -32,7 +36,10 @@ export function normalizeTrainingProgress(
       progress.certificateEarned ?? progress.programCertificateEarned ?? false,
     finalExamScore: progress.finalExamScore ?? null,
     finalExamPassed: progress.finalExamPassed ?? false,
+    finalExamAttempts: progress.finalExamAttempts ?? 0,
+    finalExamTopicScores: progress.finalExamTopicScores ?? {},
     realWorldExercisesCompleted: progress.realWorldExercisesCompleted ?? [],
+    scenariosCompleted: progress.scenariosCompleted ?? [],
   };
 }
 
@@ -162,20 +169,47 @@ export function recordLessonQuiz(
 
 export function recordFinalExam(
   progress: TrainingProgress,
-  score: number
+  score: number,
+  topicScores: TrainingProgress["finalExamTopicScores"]
 ): TrainingProgress {
+  const attempts = progress.finalExamAttempts + 1;
   const passed = isFinalExamPassed(score);
   const examLesson = getFinalExamLesson();
   const examId = examLesson?.id ?? "certification-6-4";
   const updated = syncCertificates({
     ...progress,
+    finalExamAttempts: attempts,
     finalExamScore: Math.max(progress.finalExamScore ?? 0, score),
     finalExamPassed: passed || progress.finalExamPassed,
+    finalExamTopicScores: topicScores,
     lessonsCompleted: passed
       ? Array.from(new Set([...progress.lessonsCompleted, examId]))
       : progress.lessonsCompleted,
   });
   return updated;
+}
+
+export function canAttemptFinalExam(progress: TrainingProgress): boolean {
+  if (progress.finalExamPassed) return false;
+  return progress.finalExamAttempts < FINAL_EXAM_MAX_ATTEMPTS;
+}
+
+export function mustReviewModules(progress: TrainingProgress): boolean {
+  return (
+    !progress.finalExamPassed &&
+    progress.finalExamAttempts >= FINAL_EXAM_MAX_ATTEMPTS
+  );
+}
+
+export function markScenarioComplete(
+  progress: TrainingProgress,
+  lessonId: string
+): TrainingProgress {
+  if (progress.scenariosCompleted.includes(lessonId)) return progress;
+  return {
+    ...progress,
+    scenariosCompleted: [...progress.scenariosCompleted, lessonId],
+  };
 }
 
 export function markRealWorldExerciseComplete(

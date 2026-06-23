@@ -4,16 +4,27 @@ import { MODULE_3 } from "./modules/module-3-dfars";
 import { MODULE_4 } from "./modules/module-4-administration";
 import { MODULE_5 } from "./modules/module-5-administration";
 import { MODULE_6 } from "./modules/module-6-professional";
+import { MODULE_7 } from "./modules/module-7-accounting";
+import { MODULE_8 } from "./modules/module-8-ethics";
+import { enrichModuleLessons } from "./enrich";
+import "./enrichments";
 import type { TrainingLesson, TrainingModule } from "./types";
 
-export const TRAINING_MODULES: TrainingModule[] = [
+const RAW_MODULES: TrainingModule[] = [
   MODULE_1,
   MODULE_2,
   MODULE_3,
   MODULE_4,
   MODULE_5,
   MODULE_6,
+  MODULE_7,
+  MODULE_8,
 ];
+
+export const TRAINING_MODULES: TrainingModule[] = RAW_MODULES.map((m) => ({
+  ...m,
+  lessons: enrichModuleLessons(m.lessons),
+}));
 
 export function getModuleById(id: string): TrainingModule | undefined {
   return TRAINING_MODULES.find((m) => m.id === id);

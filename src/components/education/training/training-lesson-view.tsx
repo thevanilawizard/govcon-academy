@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 import { useGameStore } from "@/lib/game/store";
-import type { TrainingLesson } from "@/lib/education/training/types";
-import { QUIZ_PASS_THRESHOLD } from "@/lib/education/training/types";
+import type { TrainingLesson, TrainingProgress } from "@/lib/education/training/types";
+import {
+  FINAL_EXAM_MAX_ATTEMPTS,
+  FINAL_EXAM_PASS_THRESHOLD,
+  FINAL_EXAM_QUESTION_COUNT,
+  QUIZ_PASS_THRESHOLD,
+} from "@/lib/education/training/types";
+import {
+  canAttemptFinalExam,
+  mustReviewModules,
+} from "@/lib/education/training/progress";
 import { renderLinkedText } from "@/lib/education/glossary-links";
 import { GLOSSARY_BY_TERM } from "@/lib/education/glossary-full";
 import { useMartin } from "@/hooks/use-martin";
@@ -16,12 +25,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CaseStudiesSection } from "@/components/education/training/case-studies-section";
+import { WhatWouldYouDo } from "@/components/education/training/what-would-you-do";
+import {
+  RegulatoryDeepDiveSection,
+  SampleDocumentsSection,
+} from "@/components/education/training/sample-documents-section";
 
 export function TrainingLessonView({
   lesson,
   completed,
   bestScore,
   exerciseDone,
+  scenarioDone,
+  trainingProgress,
   locked,
   onBack,
   onTakeQuiz,
@@ -31,12 +48,15 @@ export function TrainingLessonView({
   completed: boolean;
   bestScore?: number;
   exerciseDone: boolean;
+  scenarioDone: boolean;
+  trainingProgress: TrainingProgress;
   locked: boolean;
   onBack: () => void;
   onTakeQuiz: () => void;
   onOpenFinalExam?: () => void;
 }) {
   const markRealWorldExercise = useGameStore((s) => s.markRealWorldExercise);
+  const markScenarioComplete = useGameStore((s) => s.markScenarioComplete);
   const setActiveTab = useGameStore((s) => s.setActiveTab);
   const { askMartin } = useMartin();
   const [glossaryTerm, setGlossaryTerm] = useState<string | null>(null);
@@ -67,6 +87,12 @@ export function TrainingLessonView({
   }
 
   if (lesson.isFinalExam) {
+    const attemptsRemaining = Math.max(
+      0,
+      FINAL_EXAM_MAX_ATTEMPTS - trainingProgress.finalExamAttempts
+    );
+    const blocked = mustReviewModules(trainingProgress);
+
     return (
       <div className="space-y-6 max-w-3xl">
         <button type="button" onClick={onBack} className="text-xs text-muted-foreground hover:text-foreground">
@@ -84,7 +110,24 @@ export function TrainingLessonView({
             </p>
           </article>
         ))}
-        <Button onClick={onOpenFinalExam}>Begin 100-question final exam</Button>
+        {trainingProgress.finalExamPassed ? (
+          <Badge className="bg-emerald-600">Passed · {trainingProgress.finalExamScore}%</Badge>
+        ) : blocked ? (
+          <p className="text-sm text-red-700">
+            All {FINAL_EXAM_MAX_ATTEMPTS} attempts used. Review modules before requesting another attempt.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            <Button onClick={onOpenFinalExam} disabled={!canAttemptFinalExam(trainingProgress)}>
+              Begin {FINAL_EXAM_QUESTION_COUNT}-question final exam
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              {FINAL_EXAM_PASS_THRESHOLD}% to pass · 3-hour time limit · Attempt{" "}
+              {trainingProgress.finalExamAttempts + 1} of {FINAL_EXAM_MAX_ATTEMPTS}
+              {attemptsRemaining <= 1 && trainingProgress.finalExamAttempts > 0 && " (final attempt)"}
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -120,6 +163,26 @@ export function TrainingLessonView({
           </p>
         </article>
       ))}
+
+      {lesson.regulatoryDeepDives && lesson.regulatoryDeepDives.length > 0 && (
+        <RegulatoryDeepDiveSection dives={lesson.regulatoryDeepDives} />
+      )}
+
+      {lesson.caseStudies && lesson.caseStudies.length > 0 && (
+        <CaseStudiesSection studies={lesson.caseStudies} />
+      )}
+
+      {lesson.sampleDocuments && lesson.sampleDocuments.length > 0 && (
+        <SampleDocumentsSection documents={lesson.sampleDocuments} />
+      )}
+
+      {lesson.interactiveScenario && (
+        <WhatWouldYouDo
+          scenario={lesson.interactiveScenario}
+          completed={scenarioDone}
+          onComplete={() => markScenarioComplete(lesson.id)}
+        />
+      )}
 
       <div className="p-4 rounded-lg border bg-amber-50 border-amber-200">
         <p className="text-xs font-medium text-amber-950 mb-1">Real world application</p>
