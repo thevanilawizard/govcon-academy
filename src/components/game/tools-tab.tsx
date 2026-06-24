@@ -4,7 +4,7 @@ import { useGameStore } from "@/lib/game/store";
 import { ToolsShell } from "@/components/tools/tools-shell";
 import type { ToolId } from "@/lib/tools/types";
 
-export function ToolsTab({ initialTool }: { initialTool?: ToolId }) {
+export function ToolsTab({ initialTool }: { initialTool?: ToolId | "glossary" | "field-manual" }) {
   const setActiveTab = useGameStore((s) => s.setActiveTab);
 
   return (

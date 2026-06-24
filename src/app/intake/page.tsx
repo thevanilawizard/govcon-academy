@@ -97,7 +97,7 @@ export default function IntakePage() {
     }
 
     initFromIntake(form);
-    router.push("/setup");
+    router.push("/learning-path");
   };
 
   return (

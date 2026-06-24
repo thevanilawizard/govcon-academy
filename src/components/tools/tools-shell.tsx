@@ -11,6 +11,8 @@ import { CareerBuilderTool } from "@/components/tools/career-builder-tool";
 import { BidNoBidTool } from "@/components/tools/bid-no-bid-tool";
 import { SourcesSoughtTool } from "@/components/tools/sources-sought-tool";
 import { MarketIntelligenceTool } from "@/components/tools/market-intelligence-tool";
+import { GlossaryTab } from "@/components/game/glossary-tab";
+import { FieldManualTab } from "@/components/game/field-manual-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,16 +27,31 @@ const TOOL_COMPONENTS: Record<ToolId, ComponentType<{ onPracticeBid?: (id: strin
   "market-intelligence": MarketIntelligenceTool,
 };
 
+type ExtendedToolId = ToolId | "glossary" | "field-manual";
+
+const REFERENCE_TABS: { id: ExtendedToolId; title: string; description: string }[] = [
+  {
+    id: "glossary",
+    title: "Glossary",
+    description: "Essential federal contracting terms with examples and common mistakes.",
+  },
+  {
+    id: "field-manual",
+    title: "Field Manual",
+    description: "FAR clause library, pinned terms, and compliance reference.",
+  },
+];
+
 export function ToolsShell({
   initialTool = "proposal-workshop",
   onPracticeBid,
   standalone = false,
 }: {
-  initialTool?: ToolId;
+  initialTool?: ExtendedToolId;
   onPracticeBid?: (oppId: string) => void;
   standalone?: boolean;
 }) {
-  const [activeTool, setActiveTool] = useState<ToolId>(initialTool);
+  const [activeTool, setActiveTool] = useState<ExtendedToolId>(initialTool);
 
   return (
     <div className="space-y-6">
@@ -47,9 +64,14 @@ export function ToolsShell({
         </div>
       )}
 
-      <Tabs value={activeTool} onValueChange={(v) => setActiveTool(v as ToolId)}>
+      <Tabs value={activeTool} onValueChange={(v) => setActiveTool(v as ExtendedToolId)}>
         <TabsList className="flex flex-wrap h-auto gap-1 mb-4">
           {TOOL_REGISTRY.map((t) => (
+            <TabsTrigger key={t.id} value={t.id} className="text-xs">
+              {t.title}
+            </TabsTrigger>
+          ))}
+          {REFERENCE_TABS.map((t) => (
             <TabsTrigger key={t.id} value={t.id} className="text-xs">
               {t.title}
             </TabsTrigger>
@@ -72,6 +94,14 @@ export function ToolsShell({
             </TabsContent>
           );
         })}
+
+        <TabsContent value="glossary">
+          <GlossaryTab />
+        </TabsContent>
+
+        <TabsContent value="field-manual">
+          <FieldManualTab />
+        </TabsContent>
       </Tabs>
     </div>
   );

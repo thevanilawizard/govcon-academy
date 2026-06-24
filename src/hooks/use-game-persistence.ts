@@ -11,6 +11,12 @@ import {
   splitProgressForDb,
   type ProAcademyDbPayload,
 } from "@/lib/pro-academy/progress";
+import {
+  hydrateLearningFromDb,
+  splitProgressForDb as splitLearningForDb,
+  createLearningProgress,
+  type LearningDbPayload,
+} from "@/lib/learning/progress";
 
 export function useGamePersistence() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -36,6 +42,7 @@ export function useGamePersistence() {
   const companyOps = useGameStore((s) => s.companyOps);
   const bidDraft = useGameStore((s) => s.bidDraft);
   const educationProgress = useGameStore((s) => s.educationProgress);
+  const learningProgress = useGameStore((s) => s.learningProgress);
 
   useEffect(() => {
     stateRef.current = {
@@ -54,6 +61,7 @@ export function useGamePersistence() {
         companyOps,
         bidDraft,
         educationProgress,
+        learningProgress,
         tutorialCompleted,
       },
     };
@@ -71,6 +79,7 @@ export function useGamePersistence() {
     companyOps,
     bidDraft,
     educationProgress,
+    learningProgress,
     tutorialCompleted,
   ]);
 
@@ -92,6 +101,7 @@ export function useGamePersistence() {
 
       const supabase = createClient();
       const proPayload = splitProgressForDb(loadProAcademyProgress());
+      const learningPayload = splitLearningForDb(saveData.learningProgress ?? createLearningProgress());
       await supabase.from("game_saves").upsert(
         {
           user_id: uid,
@@ -106,6 +116,18 @@ export function useGamePersistence() {
           bid_draft: saveData.bidDraft,
           education_progress: saveData.educationProgress,
           tutorial_completed: saveData.tutorialCompleted ?? false,
+          learning_path: learningPayload.learning_path,
+          current_week: learningPayload.current_week,
+          current_day: learningPayload.current_day,
+          xp_points: learningPayload.xp_points,
+          level: learningPayload.level,
+          streak_days: learningPayload.streak_days,
+          last_active: learningPayload.last_active,
+          badges: learningPayload.badges,
+          flashcard_progress: learningPayload.flashcard_progress,
+          concept_of_day_seen: learningPayload.concept_of_day_seen,
+          lesson_progress: learningPayload.lesson_progress,
+          drill_history: learningPayload.drill_history,
           far_progress: proPayload.far_progress,
           pricing_progress: proPayload.pricing_progress,
           acquisition_progress: proPayload.acquisition_progress,
@@ -136,6 +158,7 @@ export function useGamePersistence() {
     companyOps,
     bidDraft,
     educationProgress,
+    learningProgress,
     tutorialCompleted,
   ]);
 }
@@ -149,7 +172,7 @@ export async function loadGameSave(userId: string): Promise<GameSave | null> {
     .single();
 
   if (error || !data) return null;
-  const save = data as GameSave & ProAcademyDbPayload & {
+  const save = data as GameSave & ProAcademyDbPayload & LearningDbPayload & {
     tutorial_completed?: boolean;
     company_ops?: GameSave["companyOps"];
     bid_draft?: GameSave["bidDraft"];
@@ -168,11 +191,17 @@ export async function loadGameSave(userId: string): Promise<GameSave | null> {
     hydrateProAcademyFromDb(save);
   }
 
+  let learningProgress = save.learningProgress ?? null;
+  if (save.learning_path || save.lesson_progress) {
+    learningProgress = hydrateLearningFromDb(save);
+  }
+
   return {
     ...save,
     companyOps: save.companyOps ?? save.company_ops ?? null,
     bidDraft: save.bidDraft ?? save.bid_draft ?? null,
     educationProgress: save.educationProgress ?? save.education_progress ?? null,
+    learningProgress,
     tutorialCompleted: save.tutorialCompleted ?? save.tutorial_completed ?? true,
   };
 }

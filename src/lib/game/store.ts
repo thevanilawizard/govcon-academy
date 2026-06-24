@@ -40,6 +40,23 @@ import {
   recordFinalExam,
 } from "@/lib/education/training/progress";
 import type { ExamCategory } from "@/lib/education/training/types";
+import {
+  awardXp as awardLearningXpHelper,
+  completeLesson as completeLearningLessonHelper,
+  createLearningProgress,
+  earnBadge as earnLearningBadgeHelper,
+  markSectionComplete,
+  normalizeLearningProgress,
+  recordDrillComplete,
+  selectLearningPath as selectLearningPathHelper,
+  setNavMode as setNavModeHelper,
+  skipDay as skipLearningDayHelper,
+  handleGameEvent as handleLearningGameEventHelper,
+  recordSimulatorWin,
+} from "@/lib/learning/progress";
+import { updateFlashcardProgress as updateFlashcardProgressHelper } from "@/lib/learning/daily-drill";
+import type { LearningPath, LearningProgress, NavMode } from "@/lib/learning/types";
+import type { LessonSectionId } from "@/lib/learning/types";
 import type {
   BidFactoryDraft,
   CompanyOps,
@@ -82,6 +99,7 @@ interface GameState {
   pendingAudit: ReturnType<typeof maybeTriggerComplianceAudit>;
   gameOver: GameOverState | null;
   educationProgress: EducationProgress;
+  learningProgress: LearningProgress;
   guidedMode: boolean;
   notifications: Notification[];
   martinMessages: MartinMessage[];
@@ -91,6 +109,7 @@ interface GameState {
   userId: string | null;
   isGuest: boolean;
   tutorialCompleted: boolean;
+  pendingEducationBridge: string | null;
 
   setUserId: (id: string | null) => void;
   setGuestMode: (guest: boolean) => void;
@@ -130,6 +149,25 @@ interface GameState {
   markRealWorldExercise: (lessonId: string) => void;
   markScenarioComplete: (lessonId: string) => void;
 
+  setLearningProgress: (progress: LearningProgress) => void;
+  selectLearningPath: (path: LearningPath) => void;
+  setLearningNavMode: (mode: NavMode) => void;
+  markLessonSectionComplete: (lessonId: string, sectionId: LessonSectionId) => void;
+  completeLearningLesson: (
+    lessonId: string,
+    quizScore: number,
+    minutes?: number,
+    firstTry?: boolean
+  ) => void;
+  skipLearningDay: () => void;
+  awardLearningXp: (amount: number) => void;
+  earnLearningBadge: (badgeId: string) => void;
+  recordLearningDrill: (score: number, total: number) => void;
+  updateFlashcardProgress: (cardId: string, correct: boolean) => void;
+  triggerGameEducationBridge: (event: string) => void;
+  dismissEducationBridge: () => void;
+  handleLearningGameEvent: (event: string) => void;
+
   submitProposal: (
     oppId: string,
     sliders: ProposalSliders,
@@ -156,6 +194,7 @@ const initialState = {
   pendingAudit: null,
   gameOver: null as GameOverState | null,
   educationProgress: createEducationProgress(),
+  learningProgress: createLearningProgress(),
   guidedMode: true,
   notifications: [] as Notification[],
   martinMessages: [] as MartinMessage[],
@@ -165,6 +204,7 @@ const initialState = {
   userId: null as string | null,
   isGuest: false,
   tutorialCompleted: false,
+  pendingEducationBridge: null as string | null,
 };
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -217,6 +257,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       companyOps: createCompanyOps(normalized),
       bidDraft: null,
       educationProgress: createEducationProgress(),
+      learningProgress: createLearningProgress(),
       isLoaded: true,
       tutorialCompleted: false,
     });
@@ -263,6 +304,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       bidDraft: save.bidDraft ?? null,
       gameOver: save.gameOver ?? null,
       educationProgress: normalizeEducationProgress(save.educationProgress),
+      learningProgress: normalizeLearningProgress(save.learningProgress),
       tutorialCompleted: save.tutorialCompleted ?? true,
       isLoaded: true,
     });
@@ -292,6 +334,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       bidDraft: s.bidDraft,
       gameOver: s.gameOver,
       educationProgress: s.educationProgress,
+      learningProgress: s.learningProgress,
       tutorialCompleted: s.tutorialCompleted,
     };
   },
@@ -340,6 +383,75 @@ export const useGameStore = create<GameState>((set, get) => ({
         training: markScenarioComplete(s.educationProgress.training, lessonId),
       },
     })),
+
+  setLearningProgress: (progress) => set({ learningProgress: normalizeLearningProgress(progress) }),
+
+  selectLearningPath: (path) =>
+    set((s) => ({
+      learningProgress: selectLearningPathHelper(s.learningProgress, path),
+      activeTab: path === "simulator" ? "dashboard" : "my-learning",
+    })),
+
+  setLearningNavMode: (mode) =>
+    set((s) => ({
+      learningProgress: setNavModeHelper(s.learningProgress, mode),
+      activeTab:
+        mode === "learn"
+          ? "my-learning"
+          : s.activeTab === "my-learning" || s.activeTab === "todays-lesson" || s.activeTab === "profile"
+            ? "dashboard"
+            : s.activeTab,
+    })),
+
+  markLessonSectionComplete: (lessonId, sectionId) =>
+    set((s) => ({
+      learningProgress: markSectionComplete(s.learningProgress, lessonId, sectionId),
+    })),
+
+  completeLearningLesson: (lessonId, quizScore, _minutes, firstTry) =>
+    set((s) => ({
+      learningProgress: completeLearningLessonHelper(s.learningProgress, lessonId, quizScore, {
+        firstTry,
+      }),
+    })),
+
+  skipLearningDay: () =>
+    set((s) => ({
+      learningProgress: skipLearningDayHelper(s.learningProgress),
+    })),
+
+  awardLearningXp: (amount) =>
+    set((s) => ({
+      learningProgress: awardLearningXpHelper(s.learningProgress, amount),
+    })),
+
+  earnLearningBadge: (badgeId) =>
+    set((s) => ({
+      learningProgress: earnLearningBadgeHelper(s.learningProgress, badgeId),
+    })),
+
+  recordLearningDrill: (score, total) =>
+    set((s) => ({
+      learningProgress: recordDrillComplete(s.learningProgress, score, total),
+    })),
+
+  updateFlashcardProgress: (cardId, correct) =>
+    set((s) => ({
+      learningProgress: updateFlashcardProgressHelper(s.learningProgress, cardId, correct),
+    })),
+
+  triggerGameEducationBridge: (event) => set({ pendingEducationBridge: event }),
+
+  dismissEducationBridge: () => set({ pendingEducationBridge: null }),
+
+  handleLearningGameEvent: (event) =>
+    set((s) => {
+      let learningProgress = handleLearningGameEventHelper(s.learningProgress, event);
+      if (event === "contracts_won_3" || event === "first_contract_won") {
+        learningProgress = recordSimulatorWin(learningProgress);
+      }
+      return { learningProgress };
+    }),
 
   setBidDraft: (draft) => set({ bidDraft: draft }),
 

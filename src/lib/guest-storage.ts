@@ -65,6 +65,7 @@ export async function transferGuestSaveToSupabase(
 
 export function getGuestResumePath(save: GameSave): string {
   if (!save.form) return "/intake";
-  if (!save.tutorialCompleted) return "/tutorial";
+  if (!save.learningProgress?.learningPath) return "/learning-path";
+  if (!save.tutorialCompleted && save.learningProgress.learningPath !== "simulator") return "/tutorial";
   return "/game";
 }

@@ -19,6 +19,8 @@ export function ChoiceEventModal() {
   const contracts = useGameStore((s) => s.contracts);
   const resolveChoice = useGameStore((s) => s.resolveChoice);
   const learnConcept = useGameStore((s) => s.learnConcept);
+  const triggerGameEducationBridge = useGameStore((s) => s.triggerGameEducationBridge);
+  const handleLearningGameEvent = useGameStore((s) => s.handleLearningGameEvent);
   const { askMartin } = useMartin();
 
   const contractWithChoice = contracts.find((c) => c.exec.pendingChoice);
@@ -30,9 +32,16 @@ export function ChoiceEventModal() {
 
   const handleChoice = async (choiceId: string, label: string) => {
     resolveChoice(contractWithChoice.id, choiceId);
-    if (eventKey === "scope_creep") learnConcept("scope_creep");
+    if (eventKey === "scope_creep") {
+      learnConcept("scope_creep");
+      triggerGameEducationBridge("scope_creep");
+      if (choiceId === "mod" || choiceId === "rea") handleLearningGameEvent("scope_creep_handled");
+    }
     if (eventKey === "key_personnel") learnConcept("key_personnel");
-    if (eventKey === "option_year") learnConcept("option_years");
+    if (eventKey === "option_year") {
+      learnConcept("option_years");
+      triggerGameEducationBridge("option_not_exercised");
+    }
     if (eventKey === "stop_work") learnConcept("stop_work");
     await askMartin({
       trigger: "execution_event",

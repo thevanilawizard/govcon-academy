@@ -1,4 +1,5 @@
 import type { ConceptId, EducationProgress, SkillId } from "@/lib/education/concepts";
+import type { LearningProgress } from "@/lib/learning/types";
 
 export type SetAsideId = "sb" | "sdvosb" | "vosb" | "wosb" | "8a" | "hubzone" | "full_open";
 export type Background = "military" | "federal" | "private" | "entrepreneur" | "new";
@@ -278,6 +279,7 @@ export interface GameSave {
   companyOps?: CompanyOps | null;
   bidDraft?: BidFactoryDraft | null;
   educationProgress?: EducationProgress | null;
+  learningProgress?: LearningProgress | null;
   gameOver?: GameOverState | null;
   tutorialCompleted?: boolean;
   updated_at?: string;

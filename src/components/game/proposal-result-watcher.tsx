@@ -15,6 +15,9 @@ export function ProposalResultWatcher() {
   const setActiveTab = useGameStore((s) => s.setActiveTab);
   const learnConcept = useGameStore((s) => s.learnConcept);
   const recordDecision = useGameStore((s) => s.recordDecision);
+  const triggerGameEducationBridge = useGameStore((s) => s.triggerGameEducationBridge);
+  const handleLearningGameEvent = useGameStore((s) => s.handleLearningGameEvent);
+  const profile = useGameStore((s) => s.profile);
   const { askMartin } = useMartin();
   const processed = useRef(new Set<string>());
   const [debriefId, setDebriefId] = useState<string | null>(null);
@@ -29,6 +32,11 @@ export function ProposalResultWatcher() {
       if (p.result === "won") {
         addNotification(`Won: ${p.oppTitle} — ${formatCurrency(p.value)}`, "success");
         setWinId(p.id);
+        triggerGameEducationBridge("contract_won");
+        handleLearningGameEvent("first_contract_won");
+        if ((profile?.contractsWon ?? 0) + 1 >= 3) {
+          handleLearningGameEvent("contracts_won_3");
+        }
         if (p.oppId.startsWith("live-") && getLivePracticeContext(p.oppId)) {
           setLivePracticeProposal(p);
         }
@@ -41,6 +49,7 @@ export function ProposalResultWatcher() {
       } else {
         addNotification(`Lost: ${p.oppTitle} — debrief available`, "warning");
         setDebriefId(p.id);
+        triggerGameEducationBridge("bid_lost");
         if (p.oppId.startsWith("live-") && getLivePracticeContext(p.oppId)) {
           setLivePracticeProposal(p);
         }
@@ -52,7 +61,7 @@ export function ProposalResultWatcher() {
         });
       }
     });
-  }, [submitted, addNotification, setActiveTab, askMartin, learnConcept, recordDecision]);
+  }, [submitted, addNotification, setActiveTab, askMartin, learnConcept, recordDecision, triggerGameEducationBridge, handleLearningGameEvent, profile?.contractsWon]);
 
   return (
     <>
