@@ -12,9 +12,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useMartin } from "@/hooks/use-martin";
+import { useJobReadiness } from "@/hooks/use-job-readiness";
 import { MartinCard } from "@/components/game/martin-card";
 import { EducationCenter } from "@/components/education/education-center";
+import { computeOverallReadiness, getReadinessLevel } from "@/lib/job-readiness/scoring";
 
 const STAGE_LABELS: Record<string, string> = {
   micro: "Micro (under $150K)",
@@ -36,7 +39,9 @@ export function DashboardTab() {
   const martinMessages = useGameStore((s) => s.martinMessages);
   const advanceToNextQuarter = useGameStore((s) => s.advanceToNextQuarter);
   const addNotification = useGameStore((s) => s.addNotification);
+  const setActiveTab = useGameStore((s) => s.setActiveTab);
   const { askMartin } = useMartin();
+  const { progress: readinessProgress, hydrated: readinessHydrated } = useJobReadiness();
 
   if (!form || !profile || !fin) return null;
 
@@ -57,6 +62,8 @@ export function DashboardTab() {
   };
 
   const latestMartin = martinMessages[martinMessages.length - 1];
+  const readinessScore = readinessHydrated ? computeOverallReadiness(readinessProgress) : 0;
+  const readinessLevel = getReadinessLevel(readinessScore);
 
   return (
     <div className="space-y-6">
@@ -193,6 +200,28 @@ export function DashboardTab() {
             <p className="text-xs text-muted-foreground mt-1">
               {activeContracts.length} active · {pendingSetup.length} pending setup
             </p>
+          </CardContent>
+        </Card>
+        <Card
+          className="cursor-pointer hover:border-primary/40 transition-colors"
+          onClick={() => setActiveTab("job-readiness")}
+        >
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground font-normal">Job Readiness</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-medium text-primary">
+              {readinessHydrated ? `${readinessScore}%` : "—"}
+            </p>
+            {readinessHydrated && (
+              <>
+                <Progress value={readinessScore} className="mt-2" />
+                <p className="text-xs text-muted-foreground mt-1">{readinessLevel.label}</p>
+              </>
+            )}
+            <Button variant="link" size="sm" className="px-0 mt-1 h-auto text-xs" onClick={(e) => { e.stopPropagation(); setActiveTab("job-readiness"); }}>
+              Open program →
+            </Button>
           </CardContent>
         </Card>
       </div>
