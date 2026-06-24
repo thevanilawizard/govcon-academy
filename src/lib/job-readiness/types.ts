@@ -7,7 +7,8 @@ export type JobReadinessSectionId =
   | "assessment"
   | "roadmap"
   | "vocabulary"
-  | "scenarios";
+  | "scenarios"
+  | "sr-admin";
 
 export type AssessmentArea =
   | "far"
@@ -139,4 +140,7 @@ export interface JobReadinessProgress {
   vocabularyCardStats: Record<string, { correct: number; wrong: number }>;
   scenariosCompleted: string[];
   scenarioBestScores: Record<string, number>;
+  srAdminProgress: Record<string, { lessonDone: boolean; quizScore?: number; exerciseDone?: boolean }>;
+  srAdminCfcmMockScores: number[];
+  srAdminInterviewPracticed: string[];
 }

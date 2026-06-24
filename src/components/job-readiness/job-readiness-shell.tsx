@@ -21,6 +21,7 @@ import { JobReadinessAssessment } from "./job-readiness-assessment";
 import { JobReadinessRoadmap } from "./job-readiness-roadmap";
 import { JobReadinessVocabulary } from "./job-readiness-vocabulary";
 import { JobReadinessScenarios } from "./job-readiness-scenarios";
+import { JobReadinessSrAdmin } from "./job-readiness-sr-admin";
 
 export function JobReadinessShell({
   initialSection = "overview",
@@ -95,6 +96,9 @@ export function JobReadinessShell({
         </TabsContent>
         <TabsContent value="scenarios">
           <JobReadinessScenarios progress={progress} onUpdate={update} />
+        </TabsContent>
+        <TabsContent value="sr-admin">
+          <JobReadinessSrAdmin progress={progress} onUpdate={update} />
         </TabsContent>
       </Tabs>
     </div>

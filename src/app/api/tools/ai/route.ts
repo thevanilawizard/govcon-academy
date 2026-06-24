@@ -99,6 +99,16 @@ Score on: FAR/DFARS accuracy, structure (STAR for behavioral), specificity, prof
 }
 Score on: correct FAR 15.404 technique identification, application to the scenario facts, documentation requirements, and professional completeness.`,
 
+  "contract-brief-grade": `You are Martin Business, a senior federal contracts administrator reviewing a trainee's contract brief for internal stakeholders. Grade the brief against standard GovCon contract brief requirements. Return ONLY valid JSON:
+{
+  "score": number (0-100),
+  "sectionsCompleted": ["list of sections adequately addressed"],
+  "missed": ["specific missing or weak items"],
+  "feedback": "2-4 sentence constructive assessment",
+  "passed": boolean
+}
+Score on: completeness of all 7 sections (identification, scope, financial, deliverables, key clauses, compliance calendar, risk flags), accuracy of contract details, and professional usability for PM/finance teams. Passing threshold is 70%.`,
+
   "live-practice-debrief": `You are Martin Business. Compare the simulated bid outcome to your prior capture analysis of this real SAM.gov opportunity. Explain:
 1. Whether the simulation result aligns with your real-world assessment
 2. What the outcome teaches about competitive positioning on this type of work

@@ -75,6 +75,35 @@ export function JobReadinessOverview({
         </Card>
       </div>
 
+      <Card
+        className="border-primary/40 bg-primary/5 cursor-pointer hover:border-primary/60 transition-colors"
+        onClick={() => onNavigate("sr-admin")}
+      >
+        <CardContent className="p-5 space-y-3">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <Badge className="mb-2">Targeted program</Badge>
+              <p className="font-medium">Sr. Contracts Administrator — Job Ready Program</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                8 skills for senior GovCon contracts admin roles ($95K–$110K): cradle-to-grave management,
+                contract briefs, redlining, compliance risk, portfolio management, proposal support, Excel
+                templates, and CFCM certification prep.
+              </p>
+            </div>
+            <Badge variant="outline">Career Ready module included</Badge>
+          </div>
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onNavigate("sr-admin");
+            }}
+          >
+            Open Sr. Contracts Admin program
+          </Button>
+        </CardContent>
+      </Card>
+
       <div>
         <h3 className="text-base font-medium mb-3">Section progress</h3>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">

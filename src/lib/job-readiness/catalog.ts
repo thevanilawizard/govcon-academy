@@ -54,6 +54,12 @@ export const JOB_READINESS_SECTIONS: {
     title: "Simulation scenarios",
     description: "20 branching scenarios teaching critical CM skills.",
   },
+  {
+    id: "sr-admin",
+    title: "Sr. Contracts Admin",
+    description:
+      "Job Ready Program: cradle-to-grave, contract briefs, redlining, CFCM prep, and Career Ready interview prep for $95K–$110K roles.",
+  },
 ];
 
 export const ASSESSMENT_AREAS = [

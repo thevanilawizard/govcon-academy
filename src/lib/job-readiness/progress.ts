@@ -1,6 +1,7 @@
 import type { AssessmentArea, JobReadinessProgress } from "./types";
 import { ASSESSMENT_AREAS, JOB_READINESS_SECTIONS } from "./catalog";
 import { computeOverallReadiness, getReadinessLevel } from "./scoring";
+import { getAllSrAdminLessons } from "./sr-admin";
 
 const STORAGE_KEY = "govcon_job_readiness_progress";
 
@@ -21,6 +22,9 @@ export function createJobReadinessProgress(): JobReadinessProgress {
     vocabularyCardStats: {},
     scenariosCompleted: [],
     scenarioBestScores: {},
+    srAdminProgress: {},
+    srAdminCfcmMockScores: [],
+    srAdminInterviewPracticed: [],
   };
 }
 
@@ -63,6 +67,11 @@ export function getSectionProgress(sectionId: string, progress: JobReadinessProg
       return { done: progress.documentsReviewed.length, total: 8 };
     case "scenarios":
       return { done: progress.scenariosCompleted.length, total: 20 };
+    case "sr-admin":
+      return {
+        done: Object.values(progress.srAdminProgress).filter((l) => l.lessonDone).length,
+        total: getAllSrAdminLessons().length,
+      };
     case "vocabulary":
       return { done: progress.vocabularyMastered.length, total: 300 };
     case "roadmap":

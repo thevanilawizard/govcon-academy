@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useGameStore } from "@/lib/game/store";
 import { SET_ASIDE_MAP } from "@/lib/game/constants";
 import {
@@ -28,6 +29,7 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export function DashboardTab() {
+  const router = useRouter();
   const form = useGameStore((s) => s.form);
   const profile = useGameStore((s) => s.profile);
   const fin = useGameStore((s) => s.fin);
@@ -204,7 +206,7 @@ export function DashboardTab() {
         </Card>
         <Card
           className="cursor-pointer hover:border-primary/40 transition-colors"
-          onClick={() => setActiveTab("job-readiness")}
+          onClick={() => router.push("/job-readiness")}
         >
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground font-normal">Job Readiness</CardTitle>
@@ -219,7 +221,7 @@ export function DashboardTab() {
                 <p className="text-xs text-muted-foreground mt-1">{readinessLevel.label}</p>
               </>
             )}
-            <Button variant="link" size="sm" className="px-0 mt-1 h-auto text-xs" onClick={(e) => { e.stopPropagation(); setActiveTab("job-readiness"); }}>
+            <Button variant="link" size="sm" className="px-0 mt-1 h-auto text-xs" onClick={(e) => { e.stopPropagation(); router.push("/job-readiness"); }}>
               Open program →
             </Button>
           </CardContent>

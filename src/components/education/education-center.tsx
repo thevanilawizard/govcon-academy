@@ -102,6 +102,17 @@ export function EducationCenter() {
           <p className="text-xs font-medium text-primary mb-1">What to study next</p>
           <p className="text-sm leading-relaxed">{studyNext}</p>
         </div>
+
+        <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-2">
+          <p className="text-sm font-medium">Sr. Contracts Administrator — Job Ready Program</p>
+          <p className="text-xs text-muted-foreground">
+            Cradle-to-grave contract management, contract briefs, redlining, CFCM prep, and career-ready
+            interview training for $95K–$110K roles.
+          </p>
+          <Button size="sm" variant="outline" onClick={() => window.open("/sr-contracts-admin", "_blank")}>
+            Open Job Ready Program
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useLearning } from "@/hooks/use-learning";
 import { useGameStore } from "@/lib/game/store";
 import { getCurriculum, getTodaysLesson } from "@/lib/learning/curricula";
@@ -129,6 +130,25 @@ export function MyLearningDashboard({
       <KnowledgeMap progress={progress} lessons={lessons} onTopicClick={onOpenLesson} />
 
       <ConceptOfTheDay onLearnMore={(id) => id && onOpenLesson?.(id)} />
+
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader className="pb-2">
+          <Badge className="w-fit mb-1">Education Center</Badge>
+          <CardTitle className="text-base">Sr. Contracts Administrator — Job Ready Program</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Target $95K–$110K senior contracts admin roles with cradle-to-grave management, contract briefs,
+            redlining, compliance risk flagging, portfolio management, and CFCM exam prep.
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/sr-contracts-admin">Open Job Ready Program</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/job-readiness?section=sr-admin">Career Ready (Job Readiness)</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2">
