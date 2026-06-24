@@ -24,8 +24,8 @@ export function GuidedMartinPanel({
   const advice = getGuidedAdvice(screen, { opp, quarter });
 
   return (
-    <aside className="hidden lg:block w-72 shrink-0">
-      <div className="sticky top-24 space-y-2">
+    <aside className="w-full lg:w-72 shrink-0 order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start">
+      <div className="space-y-2 border rounded-lg p-3 bg-muted/30 lg:border-0 lg:bg-transparent lg:p-0">
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           Martin — Guided Mode
         </p>

@@ -112,22 +112,22 @@ export default function GamePage() {
         <ComplianceAuditModal />
         <GameOverModal />
 
-        <div className="flex gap-8">
-          <div className="flex-1 min-w-0">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-                <TabsTrigger value="proposals">Bid Factory</TabsTrigger>
-                <TabsTrigger value="contracts">Contracts</TabsTrigger>
-                <TabsTrigger value="academy">Education Center</TabsTrigger>
-                <TabsTrigger value="job-readiness">Job Readiness</TabsTrigger>
-                <TabsTrigger value="tools">Tools</TabsTrigger>
-                <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
-                <TabsTrigger value="martin">Martin</TabsTrigger>
-                <TabsTrigger value="glossary">Glossary</TabsTrigger>
-              </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6 flex flex-wrap h-auto gap-1 w-full">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+            <TabsTrigger value="proposals">Bid Factory</TabsTrigger>
+            <TabsTrigger value="contracts">Contracts</TabsTrigger>
+            <TabsTrigger value="academy">Education Center</TabsTrigger>
+            <TabsTrigger value="job-readiness">Job Readiness</TabsTrigger>
+            <TabsTrigger value="tools">Tools</TabsTrigger>
+            <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
+            <TabsTrigger value="martin">Martin</TabsTrigger>
+            <TabsTrigger value="glossary">Glossary</TabsTrigger>
+          </TabsList>
 
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            <div className="flex-1 min-w-0 w-full order-2 lg:order-1">
               <TabsContent value="dashboard"><DashboardTab /></TabsContent>
               <TabsContent value="opportunities"><OpportunitiesTab /></TabsContent>
               <TabsContent value="proposals"><ProposalsTab /></TabsContent>
@@ -138,10 +138,10 @@ export default function GamePage() {
               <TabsContent value="field-manual"><FieldManualTab /></TabsContent>
               <TabsContent value="martin"><MartinTab /></TabsContent>
               <TabsContent value="glossary"><GlossaryTab /></TabsContent>
-            </Tabs>
+            </div>
+            <GuidedMartinPanel />
           </div>
-          <GuidedMartinPanel />
-        </div>
+        </Tabs>
       </main>
     </div>
   );
