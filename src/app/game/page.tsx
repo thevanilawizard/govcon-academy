@@ -72,6 +72,10 @@ export default function GamePage() {
     }
   }, [isLoaded, form, tutorialCompleted, router]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [activeTab]);
+
   if (!form) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -113,18 +117,20 @@ export default function GamePage() {
         <GameOverModal />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 flex flex-wrap h-auto gap-1 w-full">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-            <TabsTrigger value="proposals">Bid Factory</TabsTrigger>
-            <TabsTrigger value="contracts">Contracts</TabsTrigger>
-            <TabsTrigger value="academy">Education Center</TabsTrigger>
-            <TabsTrigger value="job-readiness">Job Readiness</TabsTrigger>
-            <TabsTrigger value="tools">Tools</TabsTrigger>
-            <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
-            <TabsTrigger value="martin">Martin</TabsTrigger>
-            <TabsTrigger value="glossary">Glossary</TabsTrigger>
-          </TabsList>
+          <div className="sticky top-16 z-30 -mx-6 px-6 pt-1 pb-3 mb-4 bg-white border-b">
+            <TabsList className="flex flex-wrap h-auto gap-1 w-full">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+              <TabsTrigger value="proposals">Bid Factory</TabsTrigger>
+              <TabsTrigger value="contracts">Contracts</TabsTrigger>
+              <TabsTrigger value="academy">Education Center</TabsTrigger>
+              <TabsTrigger value="job-readiness">Job Readiness</TabsTrigger>
+              <TabsTrigger value="tools">Tools</TabsTrigger>
+              <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
+              <TabsTrigger value="martin">Martin</TabsTrigger>
+              <TabsTrigger value="glossary">Glossary</TabsTrigger>
+            </TabsList>
+          </div>
 
           <div className="flex flex-col lg:flex-row gap-8 items-start">
             <div className="flex-1 min-w-0 w-full order-2 lg:order-1">
