@@ -21,6 +21,7 @@ create table game_saves (
 -- alter table game_saves add column if not exists quiz_scores jsonb;
 -- alter table game_saves add column if not exists certificate_earned boolean default false;
 -- alter table game_saves add column if not exists exam_score integer;
+-- Pro Academy columns — see supabase/migrations/20250622_pro_academy_columns.sql
 
 alter table game_saves enable row level security;
 

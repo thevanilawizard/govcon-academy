@@ -1,0 +1,120 @@
+import { proLesson, proModule, q, tf } from "../content-helpers";
+
+const MODULE_ID = "pricing-p3";
+
+export const PRICING_P3_MODULE = proModule(
+  MODULE_ID,
+  "pricing",
+  3,
+  "P3: Cost Allowability",
+  "FAR Part 31 allowability framework and comprehensive FAR 31.205 specifically unallowable costs with examples.",
+  [
+    "Apply the four-part allowability test on any cost scenario",
+    "Identify and exclude FAR 31.205 unallowables from proposals and billings",
+    "Defend allowability with documentation during DCAA audit",
+  ],
+  [
+    proLesson(
+      MODULE_ID,
+      "pricing",
+      "P3.1",
+      "FAR 31.201 Allowability Framework",
+      [
+        "Apply the four-part test: reasonable, allocable, compliant, not unallowable",
+        "Assess reasonableness under 31.201-3",
+        "Determine allocability under 31.201-4",
+      ],
+      [
+        { citation: "FAR 31.201-2", text: "A cost is allowable only when it meets the requirements of reasonableness, allocability, standards in this part, CAS if applicable, and the terms of the contract." },
+        { citation: "FAR 31.201-3", text: "A cost is reasonable if it does not exceed what a prudent person would pay in the conduct of competitive business." },
+        { citation: "FAR 31.201-4", text: "A cost is allocable if it is incurred specifically for the contract or benefits both the contract and other work in reasonable proportion." },
+      ],
+      [
+        { heading: "Four-part test", content: "Every cost must pass: (1) reasonable, (2) allocable, (3) GAAP/CAS/contract compliant treatment, (4) not specifically unallowable under 31.205." },
+        { heading: "Reasonableness", content: "Would a prudent business pay this amount for this benefit? Benchmarks, competition, and policies support reasonableness." },
+        { heading: "Allocability", content: "Trace benefit to contract via timesheets, usage logs, or statistical allocation. No shotgun allocation of corporate costs to one contract without basis." },
+      ],
+      "Maintain unallowable cost accounts separate from direct/indirect pools. Train PMs before they approve vendor invoices.",
+      "DCAA Incurred Cost audits test allowability—disallowed costs must be credited to the government.",
+      [{ title: "Luxury hotel", situation: "Employee books $600/night hotel when GSA per diem is $180.", whyItMatters: "Excess is unallowable even if travel itself is allowable." }],
+      [{ violation: "Charging expressly unallowable 31.205 costs to contracts", consequence: "Repayment, interest, FCA if knowing false invoice." }],
+      [
+        q("p3-1-1", "Allowability requires all of EXCEPT:", ["Reasonableness", "Allocability", "Highest industry price", "Not specifically unallowable"], 2, "Highest price is not a test—reasonableness is opposite."),
+        q("p3-1-2", "Reasonableness asks whether:", ["A prudent person would pay the cost", "DCAA pre-approved", "COR emailed OK", "Competitor charged more"], 0, "FAR 31.201-3 prudent person standard."),
+        tf("p3-1-3", "Allocability requires benefit to the contract.", true, "FAR 31.201-4 beneficial relationship."),
+        q("p3-1-4", "Specific unallowables appear in:", ["31.205", "Part 52 only", "Part 12", "Part 6"], 0, "FAR 31.205 lists specific unallowables."),
+        tf("p3-1-5", "Consistent accounting treatment is required.", true, "FAR 31.201-2 requires consistent treatment."),
+        q("p3-1-6", "CAS applies when:", ["Contract requires CAS", "Never", "All commercial items", "Micro-purchases only"], 0, "CAS applies when incorporated in contract."),
+      ],
+      { farReferences: ["31.201-2", "31.201-3", "31.201-4"] }
+    ),
+    proLesson(
+      MODULE_ID,
+      "pricing",
+      "P3.2",
+      "FAR 31.205 Specifically Unallowable Costs",
+      [
+        "Identify major 31.205 unallowable categories with examples",
+        "Distinguish allowable vs unallowable within gray-area costs",
+        "Implement controls to prevent unallowable charging",
+      ],
+      [
+        { citation: "FAR 31.205", text: "Selected costs in this subsection are generally unallowable or limited unless stated otherwise." },
+        { citation: "FAR 31.205-14", text: "Fines, penalties, and mischarging costs are unallowable." },
+        { citation: "FAR 31.205-22", text: "Lobbying and political activity costs are unallowable." },
+      ],
+      [
+        { heading: "31.205-1 Public relations/advertising", content: "Unallowable: institutional ads, general brand campaigns. Allowable: recruitment ads, safety notices required by contract." },
+        { heading: "31.205-3 Bad debts", content: "Always unallowable on government contracts." },
+        { heading: "31.205-6 Compensation", content: "Must be reasonable. Executive comp above benchmarks requires survey support. Severance limits apply." },
+        { heading: "31.205-7 Contingencies", content: "Generally unallowable—cannot budget generic contingency in cost proposals as allowable cost." },
+        { heading: "31.205-8 Contributions/donations", content: "Charitable contributions unallowable unless specific authorization." },
+        { heading: "31.205-9 Entertainment", content: "Entertainment unallowable. Limited exceptions for employee morale tied to specific allowable events—not lavish parties." },
+        { heading: "31.205-10 Facilities capital cost of money", content: "Allowable imputed cost on contractor capital when criteria met—distinct from unallowable interest." },
+        { heading: "31.205-11 Depreciation", content: "Allowable per GAAP on assets used on government work; fully depreciated assets generally no additional depreciation." },
+        { heading: "31.205-13 Employee morale", content: "Allowable: modest coffee, fitness subsidies. Unallowable: country club dues, lavish events." },
+        { heading: "31.205-14 Fines and penalties", content: "Traffic fines, regulatory penalties—unallowable. Contract-related legal settlements analyzed separately." },
+        { heading: "31.205-16 Idle facilities/capacity", content: "Generally unallowable unless documented future use or contract-specific." },
+        { heading: "31.205-18 IR&D and B&P", content: "IR&D allowable with limits/reporting. Bid and proposal costs allowable." },
+        { heading: "31.205-20 Interest", content: "Interest on borrowing generally unallowable except facilities capital cost of money under 31.205-10." },
+        { heading: "31.205-22 Lobbying", content: "Lobbying Congress/agencies unallowable. Requires SF-LLL disclosure if any allowable related activity." },
+        { heading: "31.205-23 Losses on other contracts", content: "Losses on commercial work cannot be charged to government contracts." },
+        { heading: "31.205-33 Consultants", content: "Allowable with contracts, invoices, work product, and reasonableness. Contingent fees heavily restricted." },
+        { heading: "31.205-38 Selling costs", content: "Market analysis and sales support allowable; entertainment-style selling unallowable." },
+        { heading: "31.205-41 Taxes", content: "Federal income tax unallowable. State/local income, payroll, property taxes generally allowable." },
+        { heading: "31.205-44 Training", content: "Job-related training allowable; personal enrichment unallowable." },
+        { heading: "31.205-46 Travel", content: "Must follow GSA/FTR; first class generally unallowable; spouse travel unallowable." },
+        { heading: "31.205-47 Legal proceedings", content: "Defense of contract-related suits may be allowable; prosecuting the government unallowable." },
+        { heading: "31.205-51 Alcoholic beverages", content: "Always unallowable." },
+      ],
+      "Publish an internal unallowable cost list mapped to GL accounts. Monthly accounting review excludes 31.205 items before billing.",
+      "Auditors scan for 31.205 violations systematically—knowing charging triggers penalties beyond disallowance.",
+      [
+        { title: "Holiday party charge", situation: "Company books $25K holiday party to overhead pool billed 80% to government.", whyItMatters: "Entertainment/morale excess is unallowable—significant questioned costs." },
+        { title: "Lobbyist retainer", situation: "Government relations firm retainer charged to G&A on DoD contract.", whyItMatters: "31.205-22 lobbying unallowable; SF-LLL and repayment issues." },
+      ],
+      [
+        { violation: "Charging entertainment to indirect pools", consequence: "Disallowance; potential FCA on billed invoices." },
+        { violation: "Federal income tax in G&A pool", consequence: "Automatic questioned costs in ICS." },
+      ],
+      [
+        q("p3-2-1", "Entertainment costs under 31.205-9 are:", ["Always allowable", "Generally unallowable", "Allowable on CPFF only", "Allowable with COR email"], 1, "FAR 31.205-9 restricts entertainment."),
+        q("p3-2-2", "Federal income tax is:", ["Allowable in G&A", "Unallowable per 31.205-41", "Required on all invoices", "Allowable on travel"], 1, "Federal income taxes are unallowable."),
+        q("p3-2-3", "Bad debts under 31.205-3 are:", ["Allowable with approval", "Always unallowable", "Fee-bearing", "Required"], 1, "Bad debts are unallowable."),
+        tf("p3-2-4", "Lobbying costs are unallowable under 31.205-22.", true, "Lobbying and political activity unallowable."),
+        q("p3-2-5", "Bid and proposal costs are:", ["Unallowable always", "Allowable under 31.205-18", "Only on FFP", "Only overseas"], 1, "B&P is allowable with IR&D rules in 31.205-18."),
+        tf("p3-2-6", "Alcoholic beverages are unallowable per 31.205-51.", true, "Always unallowable."),
+        q("p3-2-7", "Interest on commercial loans is generally:", ["Allowable", "Unallowable under 31.205-20", "Mandatory fee", "Part of fringe"], 1, "Interest unallowable except FCCM under 31.205-10."),
+        q("p3-2-8", "First class air without justification is:", ["Always allowable", "Generally unallowable under travel rules", "Required for executives", "Part of fee"], 1, "FAR 31.205-46 limits first class."),
+        tf("p3-2-9", "Contingency reserves in proposals are generally unallowable.", true, "FAR 31.205-7 restricts contingencies."),
+        q("p3-2-10", "Losses on commercial contracts:", ["Can be allocated to Gov contracts", "Unallowable per 31.205-23", "Are fee", "Are required"], 1, "Cannot charge commercial losses to government."),
+        q("p3-2-11", "Consultant costs require documentation per:", ["31.205-33", "Part 19", "Part 45", "52.212-4"], 0, "31.205-33 governs consultant allowability."),
+        tf("p3-2-12", "Recruitment advertising can be allowable while institutional advertising is not.", true, "31.205-1 distinguishes ad types."),
+        q("p3-2-13", "Fines and penalties are:", ["Allowable if small", "Unallowable under 31.205-14", "Part of overhead always", "Tax deductible to Gov"], 1, "Fines/penalties unallowable."),
+        tf("p3-2-14", "Facilities capital cost of money differs from interest and may be allowable.", true, "31.205-10 FCCM is imputed capital cost."),
+        q("p3-2-15", "Prosecuting the government in legal costs is:", ["Always allowable", "Unallowable under 31.205-47", "Required", "Fringe"], 1, "Suits against government unallowable."),
+      ],
+      { farReferences: ["31.205-1", "31.205-3", "31.205-6", "31.205-7", "31.205-8", "31.205-9", "31.205-10", "31.205-11", "31.205-13", "31.205-14", "31.205-16", "31.205-18", "31.205-20", "31.205-22", "31.205-23", "31.205-33", "31.205-38", "31.205-41", "31.205-44", "31.205-46", "31.205-47", "31.205-51"] }
+    ),
+  ]
+);

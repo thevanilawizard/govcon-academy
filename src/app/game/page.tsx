@@ -25,6 +25,7 @@ import { GuidedMartinPanel } from "@/components/education/guided-martin-panel";
 import { TrainingAcademyTab } from "@/components/education/training/training-academy-tab";
 import { ToolsTab } from "@/components/game/tools-tab";
 import { JobReadinessTab } from "@/components/game/job-readiness-tab";
+import { ProAcademyTab } from "@/components/game/pro-academy-tab";
 import { ResetGameButton } from "@/components/game/reset-game-button";
 import { Button } from "@/components/ui/button";
 
@@ -125,6 +126,7 @@ export default function GamePage() {
               <TabsTrigger value="contracts">Contracts</TabsTrigger>
               <TabsTrigger value="academy">Education Center</TabsTrigger>
               <TabsTrigger value="job-readiness">Job Readiness</TabsTrigger>
+              <TabsTrigger value="pro-academy">Pro Academy</TabsTrigger>
               <TabsTrigger value="tools">Tools</TabsTrigger>
               <TabsTrigger value="field-manual">Field Manual</TabsTrigger>
               <TabsTrigger value="martin">Martin</TabsTrigger>
@@ -140,6 +142,7 @@ export default function GamePage() {
               <TabsContent value="contracts"><ContractsTab /></TabsContent>
               <TabsContent value="academy"><TrainingAcademyTab /></TabsContent>
               <TabsContent value="job-readiness"><JobReadinessTab /></TabsContent>
+              <TabsContent value="pro-academy"><ProAcademyTab /></TabsContent>
               <TabsContent value="tools"><ToolsTab /></TabsContent>
               <TabsContent value="field-manual"><FieldManualTab /></TabsContent>
               <TabsContent value="martin"><MartinTab /></TabsContent>

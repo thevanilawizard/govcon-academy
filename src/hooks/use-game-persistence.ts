@@ -5,6 +5,12 @@ import { useGameStore } from "@/lib/game/store";
 import { createClient } from "@/lib/supabase/client";
 import { saveGuestToStorage } from "@/lib/guest-storage";
 import type { GameSave } from "@/lib/game/types";
+import {
+  hydrateProAcademyFromDb,
+  loadProAcademyProgress,
+  splitProgressForDb,
+  type ProAcademyDbPayload,
+} from "@/lib/pro-academy/progress";
 
 export function useGamePersistence() {
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -85,6 +91,7 @@ export function useGamePersistence() {
       if (!uid) return;
 
       const supabase = createClient();
+      const proPayload = splitProgressForDb(loadProAcademyProgress());
       await supabase.from("game_saves").upsert(
         {
           user_id: uid,
@@ -99,6 +106,13 @@ export function useGamePersistence() {
           bid_draft: saveData.bidDraft,
           education_progress: saveData.educationProgress,
           tutorial_completed: saveData.tutorialCompleted ?? false,
+          far_progress: proPayload.far_progress,
+          pricing_progress: proPayload.pricing_progress,
+          acquisition_progress: proPayload.acquisition_progress,
+          quiz_history: proPayload.quiz_history,
+          certification_scores: proPayload.certification_scores,
+          bookmarked_clauses: proPayload.bookmarked_clauses,
+          tool_history: proPayload.tool_history,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "user_id" }
@@ -135,12 +149,25 @@ export async function loadGameSave(userId: string): Promise<GameSave | null> {
     .single();
 
   if (error || !data) return null;
-  const save = data as GameSave & {
+  const save = data as GameSave & ProAcademyDbPayload & {
     tutorial_completed?: boolean;
     company_ops?: GameSave["companyOps"];
     bid_draft?: GameSave["bidDraft"];
     education_progress?: GameSave["educationProgress"];
   };
+
+  if (
+    save.far_progress ||
+    save.pricing_progress ||
+    save.acquisition_progress ||
+    save.quiz_history ||
+    save.certification_scores ||
+    save.bookmarked_clauses ||
+    save.tool_history
+  ) {
+    hydrateProAcademyFromDb(save);
+  }
+
   return {
     ...save,
     companyOps: save.companyOps ?? save.company_ops ?? null,
