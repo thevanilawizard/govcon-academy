@@ -6,6 +6,8 @@ import { formatCurrency, formatPercent } from "@/lib/utils";
 import { useMartin } from "@/hooks/use-martin";
 import { ProposalDebriefModal } from "@/components/game/compliance-audit-modal";
 import { ProposalWinModal } from "@/components/education/proposal-win-modal";
+import { LivePracticeDebriefModal } from "@/components/tools/live-practice-debrief-modal";
+import { getLivePracticeContext } from "@/lib/tools/storage";
 
 export function ProposalResultWatcher() {
   const submitted = useGameStore((s) => s.submitted);
@@ -17,6 +19,7 @@ export function ProposalResultWatcher() {
   const processed = useRef(new Set<string>());
   const [debriefId, setDebriefId] = useState<string | null>(null);
   const [winId, setWinId] = useState<string | null>(null);
+  const [livePracticeProposal, setLivePracticeProposal] = useState<typeof submitted[0] | null>(null);
 
   useEffect(() => {
     submitted.forEach((p) => {
@@ -26,6 +29,9 @@ export function ProposalResultWatcher() {
       if (p.result === "won") {
         addNotification(`Won: ${p.oppTitle} — ${formatCurrency(p.value)}`, "success");
         setWinId(p.id);
+        if (p.oppId.startsWith("live-") && getLivePracticeContext(p.oppId)) {
+          setLivePracticeProposal(p);
+        }
         setActiveTab("contracts");
         learnConcept(p.opp.evalCriteria === "LPTA" ? "lpta_eval" : "best_value_eval");
         askMartin({
@@ -35,6 +41,9 @@ export function ProposalResultWatcher() {
       } else {
         addNotification(`Lost: ${p.oppTitle} — debrief available`, "warning");
         setDebriefId(p.id);
+        if (p.oppId.startsWith("live-") && getLivePracticeContext(p.oppId)) {
+          setLivePracticeProposal(p);
+        }
         learnConcept("debrief_rights");
         recordDecision(false);
         askMartin({
@@ -49,6 +58,12 @@ export function ProposalResultWatcher() {
     <>
       {winId && <ProposalWinModal proposalId={winId} onClose={() => setWinId(null)} />}
       {debriefId && <ProposalDebriefModal proposalId={debriefId} onClose={() => setDebriefId(null)} />}
+      {livePracticeProposal && (
+        <LivePracticeDebriefModal
+          proposal={livePracticeProposal}
+          onClose={() => setLivePracticeProposal(null)}
+        />
+      )}
     </>
   );
 }

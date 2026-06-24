@@ -79,6 +79,12 @@ Also include a brief ## Why Sources Sought Matters section teaching the player.`
 { "headlines": ["3 options"], "summary": "LinkedIn about section", "skills": ["skill list"] }`,
 
   "bid-history-review": `You are Martin Business. Review the player's bid/no-bid decision history and identify patterns, win-rate insights, and recommendations for improving capture discipline.`,
+
+  "live-practice-debrief": `You are Martin Business. Compare the simulated bid outcome to your prior capture analysis of this real SAM.gov opportunity. Explain:
+1. Whether the simulation result aligns with your real-world assessment
+2. What the outcome teaches about competitive positioning on this type of work
+3. What the player should do differently on the next real bid for similar opportunities
+Be concise (3-5 paragraphs).`,
 };
 
 export async function POST(request: Request) {

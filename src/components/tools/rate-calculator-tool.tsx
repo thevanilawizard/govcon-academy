@@ -166,6 +166,27 @@ export function RateCalculatorTool() {
         )}
       </section>
 
+      <section className="space-y-3">
+        <h3 className="text-sm font-medium">7. Competitiveness check</h3>
+        <p className="text-xs text-muted-foreground">
+          Industry benchmarks (small GovCon services): Fringe 25–38% · OH 8–22% · G&A 8–18%
+        </p>
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="p-2 rounded border text-center">
+            <p className="text-muted-foreground mb-1">Fringe</p>
+            <RateBadge rate={results.fringePct} comp={results.competitiveness.fringe} />
+          </div>
+          <div className="p-2 rounded border text-center">
+            <p className="text-muted-foreground mb-1">Overhead</p>
+            <RateBadge rate={results.overheadPct} comp={results.competitiveness.overhead} />
+          </div>
+          <div className="p-2 rounded border text-center">
+            <p className="text-muted-foreground mb-1">G&A</p>
+            <RateBadge rate={results.gaPct} comp={results.competitiveness.ga} />
+          </div>
+        </div>
+      </section>
+
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" onClick={downloadCsv}>Download Excel (CSV)</Button>
         <Button size="sm" variant="outline" onClick={() => window.print()}>Print / PDF</Button>

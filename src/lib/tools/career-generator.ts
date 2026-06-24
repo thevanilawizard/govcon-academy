@@ -104,6 +104,29 @@ export function generateCareerResume(input: {
   };
 }
 
+export function getSuggestedModules(
+  matchPct: number,
+  completedModuleIds: string[]
+): string[] {
+  const suggestions: string[] = [];
+  const need = (id: string, label: string) => {
+    if (!completedModuleIds.includes(id)) suggestions.push(label);
+  };
+  if (matchPct < 50) {
+    need("foundations", "Module 1: Foundations of Federal Contracting");
+    need("far-depth", "Module 2: The FAR in Depth");
+  }
+  if (matchPct < 70) {
+    need("proposals", "Module 5: Proposal Development");
+    need("administration", "Module 4: Contract Administration");
+  }
+  if (matchPct < 85) {
+    need("accounting", "Module 7: Accounting and Finance");
+    need("ethics", "Module 8: Ethics and Compliance");
+  }
+  return suggestions.slice(0, 2);
+}
+
 export function mapJobQualificationMatch(
   qualifications: string | undefined,
   skills: string[]

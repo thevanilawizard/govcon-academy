@@ -219,10 +219,43 @@ export function BidNoBidTool() {
             <p className="text-sm font-medium">Decision history ({records.length})</p>
             <Button size="sm" variant="outline" onClick={reviewHistory} disabled={loading}>Review patterns</Button>
           </div>
-          {records.slice(0, 5).map((r) => (
-            <div key={r.id} className="text-xs py-1 flex justify-between">
-              <span>{r.title || r.solicitationNumber}</span>
-              <Badge variant="outline">{r.recommendation}</Badge>
+          {(() => {
+            const bidYes = records.filter((r) => r.recommendation === "BID" || r.recommendation === "BID WITH CONDITIONS");
+            const withOutcome = bidYes.filter((r) => r.outcome && r.outcome !== "pending");
+            const wins = withOutcome.filter((r) => r.outcome === "won").length;
+            if (withOutcome.length > 0) {
+              return (
+                <p className="text-xs text-muted-foreground mb-2">
+                  Win rate on BID decisions: {Math.round((wins / withOutcome.length) * 100)}% ({wins}/{withOutcome.length} tracked)
+                </p>
+              );
+            }
+            return null;
+          })()}
+          {records.slice(0, 8).map((r) => (
+            <div key={r.id} className="text-xs py-2 border-b last:border-0 space-y-1">
+              <div className="flex justify-between gap-2">
+                <span>{r.title || r.solicitationNumber}</span>
+                <Badge variant="outline">{r.recommendation}</Badge>
+              </div>
+              <div className="flex gap-1">
+                {(["won", "lost", "passed", "pending"] as const).map((o) => (
+                  <button
+                    key={o}
+                    type="button"
+                    className={`px-2 py-0.5 rounded border text-[10px] ${r.outcome === o ? "bg-primary text-primary-foreground" : "opacity-60"}`}
+                    onClick={() => {
+                      const next = records.map((rec) =>
+                        rec.id === r.id ? { ...rec, outcome: o } : rec
+                      );
+                      setRecords(next);
+                      updateToolData({ bidNoBidRecords: next });
+                    }}
+                  >
+                    {o}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useGameStore } from "@/lib/game/store";
-import { generateCareerResume, mapJobQualificationMatch } from "@/lib/tools/career-generator";
+import { generateCareerResume, getSuggestedModules, mapJobQualificationMatch } from "@/lib/tools/career-generator";
 import { callToolAi, searchUsaJobs } from "@/lib/tools/api-client";
 import { AiLoading } from "@/components/tools/shared/ai-loading";
 import { Button } from "@/components/ui/button";
@@ -146,7 +146,12 @@ export function CareerBuilderTool() {
                 <p className="text-xs text-muted-foreground">{String(job.agency)} · {String(job.location)}</p>
                 <p className="text-xs">{String(job.salary ?? "")}</p>
                 {match < 70 && (
-                  <p className="text-xs text-amber-700">Complete more Academy modules to qualify for remaining requirements.</p>
+                  <p className="text-xs text-amber-700">
+                    Complete{" "}
+                    {getSuggestedModules(match, training.moduleCertificates).join(" · ") ||
+                      "more Academy modules"}{" "}
+                    to qualify for remaining requirements.
+                  </p>
                 )}
                 {typeof job.url === "string" && job.url && (
                   <a href={job.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View posting</a>

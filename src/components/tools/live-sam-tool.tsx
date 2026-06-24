@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGameStore } from "@/lib/game/store";
 import { SET_ASIDE_MAP, NAICS_CODES } from "@/lib/game/constants";
 import { formatCurrency } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { SetAsideBadge } from "@/components/game/set-aside-badge";
 import { SamApiKeySetup } from "@/components/tools/shared/sam-api-key-setup";
 import { AiLoading } from "@/components/tools/shared/ai-loading";
 import { searchSamGov, fetchSamOpportunity, callToolAi } from "@/lib/tools/api-client";
-import { getSamGovApiKey } from "@/lib/tools/storage";
+import { getSamGovApiKey, setLivePracticeContext } from "@/lib/tools/storage";
 import { liveSamToGameOpportunity } from "@/lib/tools/samgov";
 import type { LiveSamOpportunity } from "@/lib/tools/types";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,11 @@ export function LiveSamTool({
   const [analyzing, setAnalyzing] = useState(false);
 
   const apiKey = getSamGovApiKey();
+
+  useEffect(() => {
+    if (form?.naicsCodes[0] && !naics) setNaics(form.naicsCodes[0]);
+    if (form?.setAsides[0] && !setAside) setSetAside(form.setAsides[0]);
+  }, [form, naics, setAside]);
 
   const handleSearch = async () => {
     if (!apiKey) {
@@ -116,6 +121,15 @@ export function LiveSamTool({
     if (!exists) {
       useGameStore.setState({ opps: [gameOpp, ...store.opps] });
     }
+    if (analysis) {
+      setLivePracticeContext({
+        oppId: gameOpp.id,
+        noticeId: opp.noticeId,
+        title: opp.title,
+        analysis,
+        practicedAt: new Date().toISOString(),
+      });
+    }
     store.setSelectedOppId(gameOpp.id);
     onPracticeBid?.(gameOpp.id);
   };
@@ -136,6 +150,11 @@ export function LiveSamTool({
             {analysis}
           </div>
         )}
+        {analysis && (
+          <p className="text-xs text-muted-foreground">
+            Run a practice bid to simulate win/loss — Martin will compare the outcome to this analysis afterward.
+          </p>
+        )}
         <div className="flex flex-wrap gap-2">
           <Button size="sm" onClick={() => handlePractice(selected)}>Practice bid on this opportunity</Button>
           <Button size="sm" variant="outline" asChild>
@@ -149,6 +168,13 @@ export function LiveSamTool({
   return (
     <div className="space-y-6">
       {showSetup && <SamApiKeySetup compact={!!apiKey} />}
+
+      {!apiKey && (
+        <p className="text-sm text-muted-foreground p-3 rounded-lg border bg-gray-50">
+          No SAM.gov API key yet? Switch to the <strong>Simulated opportunities</strong> tab to practice
+          bidding while you register for a free key at api.sam.gov.
+        </p>
+      )}
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         <Input placeholder="Keyword search" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
@@ -194,20 +220,23 @@ export function LiveSamTool({
                   {opp.matchTier === "strong" ? "Strong Match" : opp.matchTier === "partial" ? "Partial" : "Stretch"}
                 </Badge>
                 <span className={`text-xs font-medium px-2 py-0.5 rounded ${GRADE_COLORS[opp.grade]}`}>
-                  {opp.grade}
+                  Match {opp.grade}
                 </span>
               </div>
               <h3 className="text-sm font-medium">{opp.title}</h3>
               <p className="text-xs text-muted-foreground">{opp.solicitationNumber}</p>
+              <p className="text-xs text-muted-foreground">{opp.agency}</p>
               <div className="flex flex-wrap gap-1">
                 <SetAsideBadge setAside={opp.setAside} />
                 <Badge variant="outline">{opp.naicsCode}</Badge>
               </div>
-              <div className="flex justify-between text-xs">
-                <span>{opp.estimatedValue ? formatCurrency(opp.estimatedValue) : "Value TBD"}</span>
-                <span className="text-muted-foreground">{opp.daysRemaining}d left</span>
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Posted: {opp.postedDate ? new Date(opp.postedDate).toLocaleDateString() : "—"}</span>
+                <span>Due: {opp.daysRemaining}d left</span>
               </div>
-              <p className="text-xs text-muted-foreground line-clamp-1">{opp.agency}</p>
+              <div className="flex justify-between text-xs">
+                <span className="font-medium">{opp.estimatedValue ? formatCurrency(opp.estimatedValue) : "Value TBD"}</span>
+              </div>
               <div className="flex gap-2 pt-1">
                 <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleAnalyze(opp); }}>
                   Analyze
